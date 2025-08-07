@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option csharp_namespace = "backend_dotnet";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";  
+package raman;
+
+// The Raman service definition.
+service Raman {
+  // Checks the device status
+  rpc GetDeviceList  (Empty)          returns (DeviceList);
+  rpc DeviceCheck    (Empty)          returns (DeviceStatus);
+  rpc Connect        (ConnectRequest) returns (DeviceStatus);
+  rpc Disconnect     (Empty)		  returns (DeviceStatus);
+  rpc ReadCCD		 (Empty)          returns (stream CCD);
+}
+
+message Empty {}
+
+message Reply {
+  bool result = 1;
+  string detail = 2;
+}
+
+message ConnectRequest{
+  int32 index = 1;
+}
+
+message DeviceList{
+  repeated Device devices = 1;
+}
+
+message Device{
+  string name = 1;
+  string com_port = 2;
+  string device_id = 3;
+}
+
+message DeviceStatus {
+  bool IsConnected = 1;
+  optional Device device = 2;
+}
+
+message CCD{
+  google.protobuf.Timestamp time = 1;
+  google.protobuf.Duration duration = 3;
+  repeated double data = 2;
+}
