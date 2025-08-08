@@ -17,21 +17,13 @@ public class RamanService : Raman.RamanBase
 
     }
     public override Task<DeviceList> GetDeviceList(Empty request, ServerCallContext context)
-    {   
+    {
         return Task.FromResult(_ramanDevice.get_device_list());
     }
 
     public override Task<DeviceStatus> DeviceCheck(Empty request, ServerCallContext context)
     {
-        DeviceStatus deviceStatus = new DeviceStatus
-        {
-            IsConnected = _ramanDevice.IsConnected
-        };
-        if (_ramanDevice.IsConnected)
-        {
-            deviceStatus.Device = _ramanDevice.Device;
-        }
-        return Task.FromResult(deviceStatus);
+        return Task.FromResult(_ramanDevice.get_status());
     }
 
     public override Task<DeviceStatus> Connect(ConnectRequest request, ServerCallContext context)
@@ -44,7 +36,7 @@ public class RamanService : Raman.RamanBase
         }
         catch (Exception ex)
         {
-            if(ex is RpcException)
+            if (ex is RpcException)
             {
                 throw ex;
             }
@@ -57,16 +49,14 @@ public class RamanService : Raman.RamanBase
         _logger.LogInformation($"Disconnect: ");
         try
         {
-            bool result = _ramanDevice.disconnect();   
+            bool result = _ramanDevice.disconnect();
             return Task.FromResult(_ramanDevice.get_status());
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             throw new RpcException(new Status(StatusCode.Unknown, ex.Message));
         }
     }
-
-
-
     public override async Task ReadCCD(Empty request, IServerStreamWriter<CCD> responseStream, ServerCallContext context)
     {
         try
@@ -96,5 +86,18 @@ public class RamanService : Raman.RamanBase
         {
             _logger.LogInformation($"Stop reading CCD");
         }
+    }
+    public override Task<DeviceStatus> SetMeasureConf(MeasureConfRequest request, ServerCallContext context)
+    {
+        _logger.LogInformation($"set mesaure config with {request}");
+        if (_ramanDevice.set_laser(request.LaserPower) == false)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_laser. This should not happen"));
+        }
+        if(_ramanDevice.set_exposure(request.Exposure) == false)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_exposure. This should not happen"));
+        }
+        return Task.FromResult(_ramanDevice.get_status());
     }
 }

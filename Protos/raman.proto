@@ -13,6 +13,7 @@ service Raman {
   rpc Connect        (ConnectRequest) returns (DeviceStatus);
   rpc Disconnect     (Empty)		  returns (DeviceStatus);
   rpc ReadCCD		 (Empty)          returns (stream CCD);
+  rpc SetMeasureConf (MeasureConfRequest) returns (DeviceStatus);
 }
 
 message Empty {}
@@ -39,10 +40,17 @@ message Device{
 message DeviceStatus {
   bool IsConnected = 1;
   optional Device device = 2;
+  optional int32 laser_power = 3;
+  optional int32 exposure = 4;
 }
 
 message CCD{
   google.protobuf.Timestamp time = 1;
   google.protobuf.Duration duration = 3;
   repeated double data = 2;
+}
+
+message MeasureConfRequest{
+	int32 laser_power = 1;
+	int32 exposure = 2;
 }

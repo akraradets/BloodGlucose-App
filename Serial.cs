@@ -30,7 +30,7 @@ class Serial
     #endregion
 
     #region config
-    public static int EXPOSE_TIME = 1000;
+    public int EXPOSE_TIME = 1000;
     public readonly int CCD_DATA_PACK_SIZE = 3648;
     #endregion
 
@@ -188,6 +188,28 @@ class Serial
         serial_send();
         return is_read_ok();
     }
+    private bool cmd_set_laser_power(byte[] data)
+    {
+        block_clear();
+        block_head();
+        block_len(4 + data.Length);
+        block_cmd(wldcurrent_cmd);
+        block_content(data);
+        block_checksum();
+        serial_send();
+        return is_read_ok();
+    }
+    private bool cmd_set_exposure(byte[] data)
+    {
+        block_clear();
+        block_head();
+        block_len(4 + data.Length);
+        block_cmd(wccdexpo_cmd);
+        block_content(data);
+        block_checksum();
+        serial_send();
+        return is_read_ok();
+    }
 
     #endregion
 
@@ -260,11 +282,6 @@ class Serial
         return _read_data__is_data_here();
     }
 
-    /// <summary>
-    /// Probably testing whether sending anything has a response.
-    /// </summary>
-    /// <returns></returns>
-    // Do_Waiting_Receive_Ok
     private bool is_read_ok()
     {
         _logger.LogDebug("is_read_ok: start");
@@ -291,7 +308,7 @@ class Serial
                         _logger.LogError($"is_read_ok: BAD DATA READ: len < 3");
                         return false;
                     case 0xff:
-                        _logger.LogError($"is_read_ok: BAD DATA READ: because corrupted data");
+                        _logger.LogDebug($"is_read_ok: BAD DATA READ: because corrupted data");
                         do_retry = true;
                         break;
                     default:
@@ -331,16 +348,16 @@ class Serial
         //    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Forget to arm the read_ccd"));
 
         double[] refdata = new double[CCD_DATA_PACK_SIZE];
-        //Thread.Sleep(30);
-
         _logger.LogDebug("read_ccd: calling `cmd_start_ccd_scan_packet`");
         if (!cmd_start_ccd_scan_packet(mode))
             throw new RpcException((new Status(StatusCode.Internal, "start_scan_packet failed")));
+
 
         //Thread.Sleep(Expose_Time*15/10);
         _logger.LogDebug("read_ccd: calling `cmd_ccd_data_read`");
         if (!cmd_ccd_data_read())
             throw new RpcException((new Status(StatusCode.Internal, "ccd_data_read failed")));
+
 
         bytes_toread.RemoveAt(0);
         string msg = "";
@@ -361,5 +378,26 @@ class Serial
         return refdata;
     }
 
+    public bool set_laser_power(int laser_power)
+    {
+        byte[] data = new byte[2];
+        data[0] = (byte)((laser_power >> 8) & 0xff);
+        data[1] = (byte)(laser_power & 0xff);
+        bool result = cmd_set_laser_power(data);
+        return result;
+    }
+
+    public bool set_exposure(int exposure)
+    {
+        byte[] data = new byte[2];
+        data[0] = (byte)((exposure >> 8) & 0xff);
+        data[1] = (byte)(exposure & 0xff);
+        bool result = cmd_set_exposure(data);
+        if (result)
+        {
+            EXPOSE_TIME = exposure;
+        }
+        return result;
+    }
     #endregion
 }

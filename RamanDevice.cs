@@ -1,6 +1,7 @@
 using backend_dotnet.Model;
 using backend_dotnet.Utils;
 using Grpc.Core;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Management;
@@ -8,7 +9,7 @@ using System.Security.AccessControl;
 namespace backend_dotnet;
 
 public class RamanDevice
-{  
+{
     private bool _is_connected = false;
     private string _device_id = "\"USB\\\\VID_1A86&PID_7523\\\\5&218CC405&0&3\"";
     private int _CCD_PACKET_SIZE = 3648;
@@ -22,7 +23,9 @@ public class RamanDevice
     private Serial _serial;
     private DeviceList _device_list = new DeviceList();
     private Device _device = new Device();
-    
+    private int _laser_power = 0;
+    private int _exposure = 1000;
+
     public Device Device
     {
         get { return _device; }
@@ -44,6 +47,8 @@ public class RamanDevice
         if (_is_connected)
         {
             status.Device = _device;
+            status.LaserPower = _laser_power;
+            status.Exposure = _exposure;
         }
         return status;
     }
@@ -55,7 +60,7 @@ public class RamanDevice
         ManagementObjectCollection usbControllerDeviceCollection = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity").Get();
         foreach (ManagementObject obj in usbControllerDeviceCollection)
         {
-            
+
             foreach (string com in coms)
             {
 
@@ -90,7 +95,8 @@ public class RamanDevice
         _is_connected = true;
         return true;
     }
-    public bool connect(int index){
+    public bool connect(int index)
+    {
         if (_is_connected)
         {
             _logger.LogWarning("RamanDevice is already connected.");
@@ -112,7 +118,8 @@ public class RamanDevice
             _logger.LogError("Device is not connected. Something is wrong.");
             return false;
         }
-        catch (Exception ex){
+        catch (Exception ex)
+        {
             if (ex is ArgumentOutOfRangeException || ex is NullReferenceException)
             {
                 throw new RpcException(new Status(StatusCode.NotFound, $"Device index={index} is not in list. Check DeviceList again."));
@@ -129,7 +136,8 @@ public class RamanDevice
         _device = new Device();
         return true;
     }
-    public bool disconnect(){
+    public bool disconnect()
+    {
         if (!_is_connected)
         {
             _logger.LogWarning("RamanDevice is already disconnected.");
@@ -149,20 +157,54 @@ public class RamanDevice
         double[] ccd_data_temp = _serial.read_ccd(mode);
         return ccd_data_temp;
     }
+    public bool set_laser(int laser_power)
+    {
+        if(laser_power < 0 || laser_power > 150)
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, $"laser_power must be in [0,150] but got {laser_power}"));
+        }
 
+        try
+        {
+            _laser_power = laser_power;
+            _logger.LogInformation($"set_laser = {laser_power}");
+            bool result = _serial.set_laser_power(laser_power);
+            if (result)
+                return true;
+            // fall back to 0
+            _laser_power = 0;
+            throw new RpcException(new Status(StatusCode.Unknown, "_serial.set_laser_power return false. This should not happen."));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error: {ex.Message}");
+            _laser_power = 0;
+            throw ex;
+        }
+    }
+    public bool set_exposure(int exposure)
+    {
+        if (exposure < 1000 )
+        {
+            throw new RpcException(new Status(StatusCode.InvalidArgument, $"exposure must be greater than 1000 but got {exposure}"));
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        try
+        {
+            _exposure = exposure;
+            _logger.LogInformation($"set_exposure = {exposure}");
+            bool result = _serial.set_exposure(exposure);
+            if (result)
+                return true;
+            // fall back to 1000
+            _exposure = 1000;
+            throw new RpcException(new Status(StatusCode.Unknown, "_serial.set_exposure return false. This should not happen."));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error: {ex.Message}");
+            _exposure = 1000;
+            throw ex;
+        }
+    }
 }
