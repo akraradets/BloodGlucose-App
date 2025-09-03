@@ -5,7 +5,7 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	// "image": "mcr.microsoft.com/dotnet/sdk:9.0",
 	"dockerComposeFile": "docker-compose.yml",
-	"service": "dev",
+	"service": "backend-dotnet",
 	"workspaceFolder": "/Projects/backend_dotnet",
 	"overrideCommand": true,
 	// Use this environment variable if you need to bind mount your local source code into a new container.
