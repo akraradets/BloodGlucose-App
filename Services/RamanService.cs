@@ -34,12 +34,8 @@ public class RamanService : Raman.RamanBase
             bool result = _ramanDevice.connect(request.Index);
             return Task.FromResult(_ramanDevice.get_status());
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!(ex is RpcException))
         {
-            if (ex is RpcException)
-            {
-                throw ex;
-            }
             throw new RpcException(new Status(StatusCode.Unknown, ex.Message));
         }
     }
