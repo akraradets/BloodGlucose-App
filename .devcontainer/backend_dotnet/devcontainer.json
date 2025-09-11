@@ -3,8 +3,7 @@
 {
 	"name": "backend_dotnet",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mcr.microsoft.com/dotnet/sdk:9.0",
-	"dockerComposeFile": "docker-compose.yml",
+	"dockerComposeFile": "../docker-compose.yml",
 	"service": "backend-dotnet",
 	"workspaceFolder": "/Projects/backend_dotnet",
 	"overrideCommand": true,
