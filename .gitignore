@@ -1,4 +1,3 @@
-bin
-obj
-.vs
+backend_dotnet/bin
+backend_dotnet/obj
 .DS_Store
