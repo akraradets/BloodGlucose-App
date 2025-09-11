@@ -18,12 +18,12 @@ public class RamanService : Raman.RamanBase
     }
     public override Task<DeviceList> GetDeviceList(Empty request, ServerCallContext context)
     {
-        return Task.FromResult(_ramanDevice.get_device_list());
+        return Task.FromResult(_ramanDevice.GetDeviceList());
     }
 
     public override Task<DeviceStatus> DeviceCheck(Empty request, ServerCallContext context)
     {
-        return Task.FromResult(_ramanDevice.get_status());
+        return Task.FromResult(_ramanDevice.GetStatus());
     }
 
     public override Task<DeviceStatus> Connect(ConnectRequest request, ServerCallContext context)
@@ -32,7 +32,7 @@ public class RamanService : Raman.RamanBase
         try
         {
             bool result = _ramanDevice.connect(request.Index);
-            return Task.FromResult(_ramanDevice.get_status());
+            return Task.FromResult(_ramanDevice.GetStatus());
         }
         catch (Exception ex) when (!(ex is RpcException))
         {
@@ -46,7 +46,7 @@ public class RamanService : Raman.RamanBase
         try
         {
             bool result = _ramanDevice.disconnect();
-            return Task.FromResult(_ramanDevice.get_status());
+            return Task.FromResult(_ramanDevice.GetStatus());
         }
         catch (Exception ex)
         {
@@ -63,16 +63,20 @@ public class RamanService : Raman.RamanBase
             {
                 // each read takes about 400 - 700 ms.
                 CCD sample = new CCD();
+
+
                 sample.Time = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 double[] ccd_data = _ramanDevice.read_ccd_data();
-                stopwatch.Stop();
-                sample.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);
+
                 foreach (double point in ccd_data)
                 {
                     sample.Data.Add(point);
                 }
+                stopwatch.Stop();
+                sample.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);
+
                 _logger.LogDebug($"{sample}");
                 await responseStream.WriteAsync(sample);
                 //await Task.Delay(TimeSpan.FromSeconds(1));
@@ -94,6 +98,6 @@ public class RamanService : Raman.RamanBase
         {
             throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_exposure. This should not happen"));
         }
-        return Task.FromResult(_ramanDevice.get_status());
+        return Task.FromResult(_ramanDevice.GetStatus());
     }
 }
