@@ -1,7 +1,7 @@
 from fastapi.responses import HTMLResponse
-from fastapi import APIRouter, HTTPException
 from fastapi.templating import Jinja2Templates
-from fastapi import Request
+from fastapi import APIRouter, HTTPException, Request
+
 router = APIRouter(
     responses={
         404: {"description": "Not found (e.g., file path, resource)"},

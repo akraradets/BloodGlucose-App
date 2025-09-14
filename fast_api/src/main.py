@@ -1,12 +1,10 @@
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from src.web import router as web_routers
-
-
+from src.device import router as device_routers
 import os 
-_build_version = os.environ.get("BUILD_VERSION", "0.1.0")
+_build_version = os.environ.get("BUILD_VERSION", "DEV")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # All things needed to do before app is running
@@ -22,6 +20,7 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(web_routers)
+app.include_router(device_routers, prefix="/api/device")
 # app.include_router(web_routers, prefix="")
 
 

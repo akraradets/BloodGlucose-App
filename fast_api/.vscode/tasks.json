@@ -1,0 +1,12 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "proto",
+            "type": "shell",
+            "command": "uv run python -m grpc_tools.protoc --proto_path=${workspaceFolder}/../Protos --python_out=${workspaceFolder}/rpc --pyi_out=${workspaceFolder}/rpc --grpc_python_out=${workspaceFolder}/rpc raman.proto",
+        }
+    ]
+}
