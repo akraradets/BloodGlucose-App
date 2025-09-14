@@ -1,14 +1,14 @@
 services:
-  backend_dotnet:
+  fast_api:
     build:
       context: .
       dockerfile: dockerfile
       args:
-        USER: ubuntu
-        GID: 1000
-        UID: 1000
+        USERNAME: ubuntu
+        USER_GID: 1000
+        USER_UID: 1000
         BUILD_VERSION: DEV
-        WORKDIR: /Projects/backend_dotnet
+        WORKDIR: /Projects/fast_api
     platform: linux/amd64
     volumes:
       - /etc/timezone:/etc/timezone:ro

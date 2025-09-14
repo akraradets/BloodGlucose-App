@@ -1,11 +1,11 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-	"name": "backend_dotnet",
+	"name": "fast_api",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"dockerComposeFile": "../docker-compose.yml",
-	"service": "backend_dotnet",
-	"workspaceFolder": "/Projects/backend_dotnet",
+	"service": "fast_api",
+	"workspaceFolder": "/Projects/fast_api",
 	"overrideCommand": true,
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {
@@ -16,11 +16,12 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {
 			"installDirectlyFromGitHubRelease": true,
 			"version": "latest"
-		}
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1":{}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [5000, 5001],
+	// "forwardPorts": [5173],
 	// "portsAttributes": {
 	//		"5001": {
 	//			"protocol": "https"
@@ -31,15 +32,18 @@
 	// "postCreateCommand": "dotnet restore",
 
 	// Configure tool-specific properties.
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "ubuntu",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"ms-dotnettools.csdevkit",
-				"ms-azuretools.vscode-containers"
+				"ms-python.python",
+				"ms-python.mypy-type-checker",
+				"ms-python.black-formatter",
+				"ms-azuretools.vscode-containers",
+				"wholroyd.jinja"
 			]
 		}
-	},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "ubuntu"
+	}
 }

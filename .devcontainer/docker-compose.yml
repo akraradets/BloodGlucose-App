@@ -1,2 +1,3 @@
 include:
   - backend_dotnet/docker-compose.yml
+  - fast_api/docker-compose.yml
