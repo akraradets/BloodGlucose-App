@@ -43,7 +43,8 @@
 				"ms-python.mypy-type-checker",
 				"ms-python.black-formatter",
 				"ms-azuretools.vscode-containers",
-				"wholroyd.jinja"
+				"wholroyd.jinja",
+				"ms-toolsai.jupyter"
 			]
 		}
 	}

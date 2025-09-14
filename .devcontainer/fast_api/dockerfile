@@ -21,6 +21,7 @@ RUN apt-get update \
 # Python 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=${WORKDIR}
 
 RUN apt install -y --no-install-recommends vim
 
