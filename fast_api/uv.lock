@@ -188,6 +188,7 @@ dependencies = [
     { name = "grpcio" },
     { name = "grpcio-tools" },
     { name = "jinja2" },
+    { name = "websockets" },
 ]
 
 [package.dev-dependencies]
@@ -201,6 +202,7 @@ requires-dist = [
     { name = "grpcio", specifier = ">=1.74.0" },
     { name = "grpcio-tools", specifier = ">=1.74.0" },
     { name = "jinja2", specifier = ">=3.1.6" },
+    { name = "websockets", specifier = ">=15.0.1" },
 ]
 
 [package.metadata.requires-dev]

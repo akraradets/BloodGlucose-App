@@ -2,15 +2,160 @@
   <div class="card-body">
     <h5 class="card-title">Device</h5>
     <div class="mb-3">
-      <button type="button" class="btn btn-sm btn-primary">Get Device List</button>
+      <button type="button" class="btn btn-sm btn-primary"  onclick="get_device()">Get Device List</button>
     </div>
-
+    
     <div class="mb-3">
-      <label for="disabledSelect" class="form-label">Devices</label>
-      <select id="disabledSelect" class="form-select" disabled>
-        <option>Select Device</option>
-      </select>
+      <fieldset disabled>
+        <div class="mb-2">
+          <label for="device-select" class="form-label">Devices</label>
+          <select id="device-select" class="form-select"></select>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="connect_device()">connect</button>
+        
+        <div>
+          <b>Connection</b>: <span id="is_connected" class="badge text-bg-danger">Disconnected</span><br>
+          <b>Name</b>: <span id="device_name">-</span><br>
+          <b>Com port</b>: <span id="com_port">-</span><br>
+          <b>Device ID</b>: <span id="device_id">-</span><br>
+          <div>
+            <label for="laser_power" class="form-label"><b>Laser Power</b>:</label>
+            <output for="laser_power" id="laser_power_output" aria-hidden="true"></output>
+            <input id="laser_power" type="range" class="form-range" min="0" max="2000" step="100" value="0">
+          </div>
+          <div>
+            <label for="exposure" class="form-label"><b>Exposure</b>:</label>
+            <output for="exposure" id="exposure_output" aria-hidden="true"></output> ms
+            <input id="exposure" type="range" class="form-range" min="0" max="10000" step="500" value="0">
+          </div>
+        </div>
+      </fieldset>
+      <button id="btn-read-ccd" type="button" class="btn btn-sm btn-outline-info" onclick="read_ccd()" disabled>Stream CCD</button>
+      <button id="btn-cancel-ccd" type="button" class="btn btn-sm btn-outline-secondary" onclick="read_ccd_cancel()" disabled>Stop</button>
     </div>
-
+      
   </div>
 </div>
+
+<script lang="ts">
+  // This is an example script, please modify as needed
+  const laserPowerInput = document.getElementById('laser_power');
+  const laserPowerOutput = document.getElementById('laser_power_output');
+
+  // Set initial value
+  laserPowerOutput.textContent = laserPowerInput.value;
+
+  laserPowerInput.addEventListener('input', function() {
+    laserPowerOutput.textContent = this.value;
+  });
+
+  // This is an example script, please modify as needed
+  const exposureInput = document.getElementById('exposure');
+  const exposureOutput = document.getElementById('exposure_output');
+
+  // Set initial value
+  exposureOutput.textContent = exposureInput.value;
+
+  exposureInput.addEventListener('input', function() {
+    exposureOutput.textContent = this.value;
+  });
+
+  const socket = new WebSocket("ws://localhost:8000/api/device/ws");
+  const socket_ccd = new WebSocket("ws://localhost:8000/api/device/ws/ccd");
+  socket.addEventListener("open", (event) => {
+    socket.send("Connected");
+  });
+  // Listen for messages
+  socket.addEventListener("message", (event) => {
+    console.log("Message from server ", event.data);
+  });
+
+
+  function set_status(status){
+    const is_connected = document.getElementById("is_connected")
+    const device_name = document.getElementById("device_name")
+    const com_port = document.getElementById("com_port")
+    const device_id = document.getElementById("device_id")
+    const read_ccd_btn = document.getElementById("btn-read-ccd")
+    const cancel_ccd_btn = document.getElementById("btn-cancel-ccd")
+    if(status.IsConnected){
+      is_connected.classList.remove("text-bg-danger");
+      is_connected.classList.add("text-bg-success");
+      is_connected.innerHTML = "Connected";
+      read_ccd_btn.disabled = false;
+      cancel_ccd_btn.disabled = false;
+      // Connection opened
+      socket.send("Connected to device");
+    }else{
+      is_connected.classList.remove("text-bg-success");
+      is_connected.classList.add("text-bg-danger");
+      is_connected.innerHTML = "Disconnected";
+    }
+    device_name.innerHTML = status.device.name;
+    com_port.innerHTML = status.device.com_port;
+    device_id.innerHTML = status.device.device_id;
+
+    laserPowerInput.value = status.laser_power;
+    laserPowerOutput.textContent = status.laser_power;
+
+    exposureInput.value = status.exposure;
+    exposureOutput.textContent = status.exposure;
+  }
+
+  function get_device(){
+
+    console.log("GET DEVICE");
+    const select = document.getElementById("device-select");
+    // clear options
+    select.innerHTML = "";
+
+
+    const requestOptions = {
+      method: "GET"
+    };
+    fetch("http://localhost:8000/api/device", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        result = JSON.parse(result);
+        select.parentElement.parentElement.disabled = false;
+        result.forEach((device, index) => {
+          var opt = document.createElement('option');
+          opt.value = index;
+          opt.innerHTML = `${device.name} - ${device.com_port} - ${device.device_id}`;
+          select.appendChild(opt);
+        })
+
+      })
+      .catch((error) => console.error(error));
+  }
+
+
+  function connect_device(){
+    console.log("CONNECT DEVICE");
+    const select = document.getElementById("device-select");
+    const selected_index = select.selectedIndex;
+    const requestOptions = {
+      method: "GET"
+    };
+    fetch(`http://localhost:8000/api/device/connect/${selected_index}`, requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        result = JSON.parse(result);
+        set_status(result);
+      })
+      .catch((error) => console.error(error));
+  }
+
+  function read_ccd(){
+    console.log("READ CCD");
+    socket_ccd.send("read_ccd")
+  }
+
+  function read_ccd_cancel(){
+    console.log("CANCEL CCD");
+    socket.send("cancel")
+  }
+
+</script>
