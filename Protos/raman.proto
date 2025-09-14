@@ -42,6 +42,7 @@ message DeviceStatus {
   optional Device device = 2;
   optional int32 laser_power = 3;
   optional int32 exposure = 4;
+  optional int32 accumulations = 5;
 }
 
 message CCD{
@@ -53,4 +54,5 @@ message CCD{
 message MeasureConfRequest{
 	int32 laser_power = 1;
 	int32 exposure = 2;
+  int32 accumulations = 3;
 }

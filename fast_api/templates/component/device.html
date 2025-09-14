@@ -13,7 +13,7 @@
         </div>
         <button type="button" class="btn btn-sm btn-outline-primary" onclick="connect_device()">connect</button>
         
-        <div>
+        <div class="mb-2">
           <b>Connection</b>: <span id="is_connected" class="badge text-bg-danger">Disconnected</span><br>
           <b>Name</b>: <span id="device_name">-</span><br>
           <b>Com port</b>: <span id="com_port">-</span><br>
@@ -21,17 +21,20 @@
           <div>
             <label for="laser_power" class="form-label"><b>Laser Power</b>:</label>
             <output for="laser_power" id="laser_power_output" aria-hidden="true"></output>
-            <input id="laser_power" type="range" class="form-range" min="0" max="2000" step="100" value="0">
+            <input id="laser_power" type="range" class="form-range" min="0" max="150" step="10" value="0">
           </div>
           <div>
             <label for="exposure" class="form-label"><b>Exposure</b>:</label>
             <output for="exposure" id="exposure_output" aria-hidden="true"></output> ms
             <input id="exposure" type="range" class="form-range" min="0" max="10000" step="500" value="0">
           </div>
+          <div>
+            <label for="accumulation" class="form-label"><b>Accumulation</b>:</label>
+            <input id="accumulation" type="number" class="form-control">
+          </div>
         </div>
       </fieldset>
       <button id="btn-read-ccd" type="button" class="btn btn-sm btn-outline-info" onclick="read_ccd()" disabled>Stream CCD</button>
-      <button id="btn-cancel-ccd" type="button" class="btn btn-sm btn-outline-secondary" onclick="read_ccd_cancel()" disabled>Stop</button>
     </div>
       
   </div>
@@ -60,15 +63,28 @@
     exposureOutput.textContent = this.value;
   });
 
+  const accumulationInput = document.getElementById('accumulation');
+
+
   const socket = new WebSocket("ws://localhost:8000/api/device/ws");
-  const socket_ccd = new WebSocket("ws://localhost:8000/api/device/ws/ccd");
   socket.addEventListener("open", (event) => {
-    socket.send("Connected");
+    socket.send("Main Socket Connected");
   });
   // Listen for messages
   socket.addEventListener("message", (event) => {
     console.log("Message from server ", event.data);
   });
+  
+  const socket_ccd = new WebSocket("ws://localhost:8000/api/device/ws/ccd");
+  socket_ccd.addEventListener("open", (event) => {
+    socket_ccd.send("CCD Socket Connected");
+  });
+  // Listen for messages
+  socket_ccd.addEventListener("message", (event) => {
+    console.log("Message from server ", event.data);
+  });
+  
+
 
 
   function set_status(status){
@@ -77,13 +93,13 @@
     const com_port = document.getElementById("com_port")
     const device_id = document.getElementById("device_id")
     const read_ccd_btn = document.getElementById("btn-read-ccd")
-    const cancel_ccd_btn = document.getElementById("btn-cancel-ccd")
+    
     if(status.IsConnected){
       is_connected.classList.remove("text-bg-danger");
       is_connected.classList.add("text-bg-success");
       is_connected.innerHTML = "Connected";
       read_ccd_btn.disabled = false;
-      cancel_ccd_btn.disabled = false;
+      
       // Connection opened
       socket.send("Connected to device");
     }else{
@@ -100,6 +116,8 @@
 
     exposureInput.value = status.exposure;
     exposureOutput.textContent = status.exposure;
+
+    accumulationInput.value = status.accumulations;
   }
 
   function get_device(){
@@ -150,12 +168,19 @@
 
   function read_ccd(){
     console.log("READ CCD");
-    socket_ccd.send("read_ccd")
+    const requestOptions = {
+      method: "GET"
+    };
+    fetch(`http://localhost:8000/api/device/measure_conf/${laserPowerInput.value}/${exposureInput.value}/${accumulationInput.value}`, requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        result = JSON.parse(result);
+        set_status(result);
+        if(result.IsConnected){
+          socket_ccd.send("read_ccd");
+        }
+      })
+      .catch((error) => console.error(error));
   }
-
-  function read_ccd_cancel(){
-    console.log("CANCEL CCD");
-    socket.send("cancel")
-  }
-
 </script>

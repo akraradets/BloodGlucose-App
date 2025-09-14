@@ -26,7 +26,7 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0braman.proto\x12\x05raman\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"\x07\n\x05\x45mpty\"\'\n\x05Reply\x12\x0e\n\x06result\x18\x01 \x01(\x08\x12\x0e\n\x06\x64\x65tail\x18\x02 \x01(\t\"\x1f\n\x0e\x43onnectRequest\x12\r\n\x05index\x18\x01 \x01(\x05\",\n\nDeviceList\x12\x1e\n\x07\x64\x65vices\x18\x01 \x03(\x0b\x32\r.raman.Device\";\n\x06\x44\x65vice\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08\x63om_port\x18\x02 \x01(\t\x12\x11\n\tdevice_id\x18\x03 \x01(\t\"\xa0\x01\n\x0c\x44\x65viceStatus\x12\x13\n\x0bIsConnected\x18\x01 \x01(\x08\x12\"\n\x06\x64\x65vice\x18\x02 \x01(\x0b\x32\r.raman.DeviceH\x00\x88\x01\x01\x12\x18\n\x0blaser_power\x18\x03 \x01(\x05H\x01\x88\x01\x01\x12\x15\n\x08\x65xposure\x18\x04 \x01(\x05H\x02\x88\x01\x01\x42\t\n\x07_deviceB\x0e\n\x0c_laser_powerB\x0b\n\t_exposure\"j\n\x03\x43\x43\x44\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12+\n\x08\x64uration\x18\x03 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0c\n\x04\x64\x61ta\x18\x02 \x03(\x01\";\n\x12MeasureConfRequest\x12\x13\n\x0blaser_power\x18\x01 \x01(\x05\x12\x10\n\x08\x65xposure\x18\x02 \x01(\x05\x32\xbc\x02\n\x05Raman\x12\x30\n\rGetDeviceList\x12\x0c.raman.Empty\x1a\x11.raman.DeviceList\x12\x30\n\x0b\x44\x65viceCheck\x12\x0c.raman.Empty\x1a\x13.raman.DeviceStatus\x12\x35\n\x07\x43onnect\x12\x15.raman.ConnectRequest\x1a\x13.raman.DeviceStatus\x12/\n\nDisconnect\x12\x0c.raman.Empty\x1a\x13.raman.DeviceStatus\x12%\n\x07ReadCCD\x12\x0c.raman.Empty\x1a\n.raman.CCD0\x01\x12@\n\x0eSetMeasureConf\x12\x19.raman.MeasureConfRequest\x1a\x13.raman.DeviceStatusB\x11\xaa\x02\x0e\x62\x61\x63kend_dotnetb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0braman.proto\x12\x05raman\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\"\x07\n\x05\x45mpty\"\'\n\x05Reply\x12\x0e\n\x06result\x18\x01 \x01(\x08\x12\x0e\n\x06\x64\x65tail\x18\x02 \x01(\t\"\x1f\n\x0e\x43onnectRequest\x12\r\n\x05index\x18\x01 \x01(\x05\",\n\nDeviceList\x12\x1e\n\x07\x64\x65vices\x18\x01 \x03(\x0b\x32\r.raman.Device\";\n\x06\x44\x65vice\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08\x63om_port\x18\x02 \x01(\t\x12\x11\n\tdevice_id\x18\x03 \x01(\t\"\xce\x01\n\x0c\x44\x65viceStatus\x12\x13\n\x0bIsConnected\x18\x01 \x01(\x08\x12\"\n\x06\x64\x65vice\x18\x02 \x01(\x0b\x32\r.raman.DeviceH\x00\x88\x01\x01\x12\x18\n\x0blaser_power\x18\x03 \x01(\x05H\x01\x88\x01\x01\x12\x15\n\x08\x65xposure\x18\x04 \x01(\x05H\x02\x88\x01\x01\x12\x1a\n\raccumulations\x18\x05 \x01(\x05H\x03\x88\x01\x01\x42\t\n\x07_deviceB\x0e\n\x0c_laser_powerB\x0b\n\t_exposureB\x10\n\x0e_accumulations\"j\n\x03\x43\x43\x44\x12(\n\x04time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12+\n\x08\x64uration\x18\x03 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x0c\n\x04\x64\x61ta\x18\x02 \x03(\x01\"R\n\x12MeasureConfRequest\x12\x13\n\x0blaser_power\x18\x01 \x01(\x05\x12\x10\n\x08\x65xposure\x18\x02 \x01(\x05\x12\x15\n\raccumulations\x18\x03 \x01(\x05\x32\xbc\x02\n\x05Raman\x12\x30\n\rGetDeviceList\x12\x0c.raman.Empty\x1a\x11.raman.DeviceList\x12\x30\n\x0b\x44\x65viceCheck\x12\x0c.raman.Empty\x1a\x13.raman.DeviceStatus\x12\x35\n\x07\x43onnect\x12\x15.raman.ConnectRequest\x1a\x13.raman.DeviceStatus\x12/\n\nDisconnect\x12\x0c.raman.Empty\x1a\x13.raman.DeviceStatus\x12%\n\x07ReadCCD\x12\x0c.raman.Empty\x1a\n.raman.CCD0\x01\x12@\n\x0eSetMeasureConf\x12\x19.raman.MeasureConfRequest\x1a\x13.raman.DeviceStatusB\x11\xaa\x02\x0e\x62\x61\x63kend_dotnetb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -45,11 +45,11 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_DEVICE']._serialized_start=216
   _globals['_DEVICE']._serialized_end=275
   _globals['_DEVICESTATUS']._serialized_start=278
-  _globals['_DEVICESTATUS']._serialized_end=438
-  _globals['_CCD']._serialized_start=440
-  _globals['_CCD']._serialized_end=546
-  _globals['_MEASURECONFREQUEST']._serialized_start=548
-  _globals['_MEASURECONFREQUEST']._serialized_end=607
-  _globals['_RAMAN']._serialized_start=610
-  _globals['_RAMAN']._serialized_end=926
+  _globals['_DEVICESTATUS']._serialized_end=484
+  _globals['_CCD']._serialized_start=486
+  _globals['_CCD']._serialized_end=592
+  _globals['_MEASURECONFREQUEST']._serialized_start=594
+  _globals['_MEASURECONFREQUEST']._serialized_end=676
+  _globals['_RAMAN']._serialized_start=679
+  _globals['_RAMAN']._serialized_end=995
 # @@protoc_insertion_point(module_scope)

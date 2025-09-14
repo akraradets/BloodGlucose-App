@@ -58,8 +58,8 @@ public class RamanService : Raman.RamanBase
         try
         {
             _logger.LogInformation($"Start reading CCD");
-
-            while (!context.CancellationToken.IsCancellationRequested)
+            int accum_count = 0;
+            while (!context.CancellationToken.IsCancellationRequested && _ramanDevice._accumulation > accum_count)
             {
                 // each read takes about 400 - 700 ms.
                 CCD sample = new CCD();
@@ -80,6 +80,7 @@ public class RamanService : Raman.RamanBase
                 _logger.LogDebug($"{sample}");
                 await responseStream.WriteAsync(sample);
                 //await Task.Delay(TimeSpan.FromSeconds(1));
+                accum_count++;
             }
         }
         finally
@@ -97,6 +98,10 @@ public class RamanService : Raman.RamanBase
         if(_ramanDevice.set_exposure(request.Exposure) == false)
         {
             throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_exposure. This should not happen"));
+        }
+        if (_ramanDevice.set_accumulation(request.Accumulations) == false)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_accumulation. This should not happen"));
         }
         return Task.FromResult(_ramanDevice.GetStatus());
     }

@@ -6,7 +6,7 @@
     "configurations": [
 
         {
-            "name": "Python Debugger: FastAPI",
+            "name": "Debug: Dev",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
@@ -16,6 +16,19 @@
                 "--host=0.0.0.0"
             ],
             "envFile": "${workspaceFolder}/.envfiles/dev.env",
+            "jinja": true
+        },
+    {
+            "name": "Debug: Prod",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "src:app",
+                "--reload",
+                "--host=0.0.0.0"
+            ],
+            "envFile": "${workspaceFolder}/.envfiles/prod.env",
             "jinja": true
         }
     ]

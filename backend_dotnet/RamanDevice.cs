@@ -25,6 +25,7 @@ public class RamanDevice
     private Device _device = new();
     private int _laser_power = 0;
     private int _exposure = 1000;
+    public  int _accumulation = 1;
     // private bool is_physical_device = false; 
 
 
@@ -58,6 +59,8 @@ public class RamanDevice
             status.Device = _device;
             status.LaserPower = _laser_power;
             status.Exposure = _exposure;
+            status.Accumulations = _accumulation;
+            
         }
         return status;
     }
@@ -228,5 +231,14 @@ public class RamanDevice
         // fail to set: fall back to 1000
         _exposure = 1000;
         throw new RpcException(new Status(StatusCode.Unknown, "_serial.set_exposure return false. This should not happen."));
+    }
+
+    public bool set_accumulation(int accumulation)
+    {
+        if (!_is_connected) throw new RpcException(new Status(StatusCode.Aborted, $"Device is disconnected"));
+        
+        _accumulation = accumulation;
+        _logger.LogInformation($"set_accumulation = {accumulation}");
+        return true;
     }
 }

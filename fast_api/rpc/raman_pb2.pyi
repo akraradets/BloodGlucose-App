@@ -45,16 +45,18 @@ class Device(_message.Message):
     def __init__(self, name: _Optional[str] = ..., com_port: _Optional[str] = ..., device_id: _Optional[str] = ...) -> None: ...
 
 class DeviceStatus(_message.Message):
-    __slots__ = ("IsConnected", "device", "laser_power", "exposure")
+    __slots__ = ("IsConnected", "device", "laser_power", "exposure", "accumulations")
     ISCONNECTED_FIELD_NUMBER: _ClassVar[int]
     DEVICE_FIELD_NUMBER: _ClassVar[int]
     LASER_POWER_FIELD_NUMBER: _ClassVar[int]
     EXPOSURE_FIELD_NUMBER: _ClassVar[int]
+    ACCUMULATIONS_FIELD_NUMBER: _ClassVar[int]
     IsConnected: bool
     device: Device
     laser_power: int
     exposure: int
-    def __init__(self, IsConnected: bool = ..., device: _Optional[_Union[Device, _Mapping]] = ..., laser_power: _Optional[int] = ..., exposure: _Optional[int] = ...) -> None: ...
+    accumulations: int
+    def __init__(self, IsConnected: bool = ..., device: _Optional[_Union[Device, _Mapping]] = ..., laser_power: _Optional[int] = ..., exposure: _Optional[int] = ..., accumulations: _Optional[int] = ...) -> None: ...
 
 class CCD(_message.Message):
     __slots__ = ("time", "duration", "data")
@@ -67,9 +69,11 @@ class CCD(_message.Message):
     def __init__(self, time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., duration: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., data: _Optional[_Iterable[float]] = ...) -> None: ...
 
 class MeasureConfRequest(_message.Message):
-    __slots__ = ("laser_power", "exposure")
+    __slots__ = ("laser_power", "exposure", "accumulations")
     LASER_POWER_FIELD_NUMBER: _ClassVar[int]
     EXPOSURE_FIELD_NUMBER: _ClassVar[int]
+    ACCUMULATIONS_FIELD_NUMBER: _ClassVar[int]
     laser_power: int
     exposure: int
-    def __init__(self, laser_power: _Optional[int] = ..., exposure: _Optional[int] = ...) -> None: ...
+    accumulations: int
+    def __init__(self, laser_power: _Optional[int] = ..., exposure: _Optional[int] = ..., accumulations: _Optional[int] = ...) -> None: ...

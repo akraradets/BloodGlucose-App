@@ -44,12 +44,18 @@ class DeviceStatus(BaseModel):
     device: Device
     laser_power: int
     exposure: int
+    accumulations: int
 
 @router.get("/connect/{index}", response_class=JSONResponse)
 def get_device_connect(index: int) -> DeviceStatus:
     status:raman_pb2.DeviceStatus = stub.Connect(raman_pb2.ConnectRequest(index=index))
     return status
 
+
+@router.get("/measure_conf/{laser_power}/{exposure}/{accumulation}", response_class=JSONResponse)
+def get_device_measure_conf(laser_power: int, exposure: int, accumulation: int) -> DeviceStatus:
+    status:raman_pb2.DeviceStatus = stub.SetMeasureConf(raman_pb2.MeasureConfRequest(exposure=exposure, laser_power=laser_power, accumulations=accumulation))
+    return status
 
 
 class ConnectionManager:
@@ -72,7 +78,7 @@ class ConnectionManager:
             await connection.send_text(message)
 
 manager = ConnectionManager()
-import asyncio
+
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
@@ -82,8 +88,6 @@ async def websocket_endpoint(websocket: WebSocket):
             #     print(ccd)
             action:str = await websocket.receive_text()
             print(f"Action: {action}")
-            if(action == "cancel"):
-                manager.cancel = True
 
             # await manager.send_personal_message(f"Client: a", websocket)
             # await asyncio.sleep(1)
@@ -96,12 +100,10 @@ async def websocket_endpoint(websocket: WebSocket):
 async def read_ccd(websocket: WebSocket):
     await manager.connect(websocket)
     try:
-        action:str = await websocket.receive_text()
-        if(action == "read_ccd"):
-            manager.cancel = False
-            for ccd in stub.ReadCCD(raman_pb2.Empty()):
-                if(manager.cancel): break
-                print(manager.cancel)
-                await manager.send_personal_message(f"CCD: {ccd}", websocket)
+        while True:
+            action:str = await websocket.receive_text()
+            if(action == "read_ccd"):
+                for ccd in stub.ReadCCD(raman_pb2.Empty()):
+                    await manager.send_personal_message(f"CCD: {ccd}", websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket)

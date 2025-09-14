@@ -30,7 +30,7 @@
 	// }
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
+	"postCreateCommand": "bash /start.sh",
 
 	// Configure tool-specific properties.
 
