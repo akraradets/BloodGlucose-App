@@ -7,6 +7,7 @@
 	"service": "fast_api",
 	"workspaceFolder": "/Projects/fast_api",
 	"overrideCommand": true,
+	"runServices": ["backend_dotnet"],
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
@@ -21,7 +22,7 @@
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [5173],
+	"forwardPorts": [8000],
 	// "portsAttributes": {
 	//		"5001": {
 	//			"protocol": "https"
