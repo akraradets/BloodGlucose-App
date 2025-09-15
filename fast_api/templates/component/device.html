@@ -82,6 +82,12 @@
   // Listen for messages
   socket_ccd.addEventListener("message", (event) => {
     console.log("Message from server ", event.data);
+    console.log(event.data);
+    //if(data.type === "spectrum"){
+      // Dispatch event
+    //  const spectrum_event = new CustomEvent("spectrum", { detail: data });
+    //  window.dispatchEvent(spectrum_event);
+    //}
   });
   
 

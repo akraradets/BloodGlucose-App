@@ -1,6 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 import grpc
 import os
 
@@ -96,6 +97,12 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
         # await manager.broadcast(f"Client #{id(websocket)} left the chat")
 
+class CCD(BaseModel):
+    time: datetime
+    duration: timedelta
+    data: list[float]
+
+
 @router.websocket("/ws/ccd")
 async def read_ccd(websocket: WebSocket):
     await manager.connect(websocket)
@@ -104,6 +111,10 @@ async def read_ccd(websocket: WebSocket):
             action:str = await websocket.receive_text()
             if(action == "read_ccd"):
                 for ccd in stub.ReadCCD(raman_pb2.Empty()):
-                    await manager.send_personal_message(f"CCD: {ccd}", websocket)
+                    data = CCD(time=ccd.time.ToDatetime(), 
+                               duration=timedelta(seconds=ccd.duration.seconds + ccd.duration.nanos*1e-9), 
+                               data=ccd.data
+                               )
+                    await manager.send_personal_message(data.model_dump_json(), websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket)

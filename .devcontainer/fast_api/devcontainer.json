@@ -7,7 +7,7 @@
 	"service": "fast_api",
 	"workspaceFolder": "/Projects/fast_api",
 	"overrideCommand": true,
-	"runServices": ["backend_dotnet"],
+	"runServices": ["backend_dotnet","mongo"],
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
