@@ -1,0 +1,39 @@
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('myChart');
+  const data = {
+    labels: [...Array(2048).keys()],
+    datasets: []
+  }
+  const config = {
+    type: 'line',
+    data: data,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  };
+  const myChart = new Chart(ctx, config);
+  function set_xaxis(x_axis){
+    myChart.data.labels = x_axis;
+    myChart.update();
+  }
+  function draw_chart(sample){
+    const data = {
+        label: "data1",
+        data: sample.data,
+        borderWidth: 1,
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      }
+      myChart.data.datasets[0] = data;
+      myChart.update();
+  }
+</script>

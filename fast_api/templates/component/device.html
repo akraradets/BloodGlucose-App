@@ -82,7 +82,7 @@
   // Listen for messages
   socket_ccd.addEventListener("message", (event) => {
     console.log("Message from server ", event.data);
-    console.log(event.data);
+    draw_chart(JSON.parse(event.data));
     //if(data.type === "spectrum"){
       // Dispatch event
     //  const spectrum_event = new CustomEvent("spectrum", { detail: data });
@@ -124,6 +124,7 @@
     exposureOutput.textContent = status.exposure;
 
     accumulationInput.value = status.accumulations;
+    set_xaxis(status.x_axis);
   }
 
   function get_device(){

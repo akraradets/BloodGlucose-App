@@ -52,7 +52,7 @@ message CCD{
 }
 
 message MeasureConfRequest{
-	int32 laser_power = 1;
-	int32 exposure = 2;
+  int32 laser_power = 1;
+  int32 exposure = 2;
   int32 accumulations = 3;
 }

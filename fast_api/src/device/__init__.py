@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 import grpc
 import os
-
+import numpy as np
 from rpc import raman_pb2, raman_pb2_grpc
 
 
@@ -17,6 +17,7 @@ router = APIRouter(
 )
 
 _RPC_SERVER:str = os.environ["RPC_SERVER"]
+_x_axis = np.loadtxt("static/xaxis.txt")
 stub = raman_pb2_grpc.RamanStub(channel=grpc.insecure_channel(_RPC_SERVER))
 
 
@@ -46,10 +47,12 @@ class DeviceStatus(BaseModel):
     laser_power: int
     exposure: int
     accumulations: int
+    x_axis: list[float] = _x_axis.tolist()
 
 @router.get("/connect/{index}", response_class=JSONResponse)
 def get_device_connect(index: int) -> DeviceStatus:
     status:raman_pb2.DeviceStatus = stub.Connect(raman_pb2.ConnectRequest(index=index))
+
     return status
 
 

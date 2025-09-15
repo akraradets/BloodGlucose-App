@@ -70,9 +70,9 @@ public class RamanService : Raman.RamanBase
                 stopwatch.Start();
                 double[] ccd_data = _ramanDevice.read_ccd_data();
 
-                foreach (double point in ccd_data)
+                for(int i = 0; i < 2048; i++)
                 {
-                    sample.Data.Add(point);
+                    sample.Data.Add(ccd_data[i]);
                 }
                 stopwatch.Stop();
                 sample.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);

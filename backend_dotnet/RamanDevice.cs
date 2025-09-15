@@ -60,7 +60,6 @@ public class RamanDevice
             status.LaserPower = _laser_power;
             status.Exposure = _exposure;
             status.Accumulations = _accumulation;
-            
         }
         return status;
     }
