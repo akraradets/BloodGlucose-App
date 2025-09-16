@@ -48,16 +48,16 @@ public class ATRWrapper
 
     #region Open/Close Device
 
-    public bool OpenDevice()
+    public bool OpenDevice(string serialportname)
     {
         try
         {
             if (serial_ops.Get_Device_Status())
                 return true;
 
-            string serialportname = serial_ops.WhoUsbDevice(0x0483, 0x5740);
+            //string serialportname = serial_ops.WhoUsbDevice(0x0483, 0x5740);
 
-            if (serialportname == null) return false;
+            //if (serialportname == null) return false;
 
             bool result = serial_ops.Serial_Port_Open(serialportname);
 
@@ -304,7 +304,8 @@ public class ATRWrapper
         if (!serial_ops.Get_Device_Status())
             return null;
         // 更新设备激光功率[注：整机请开启该功能，非整机请不要开启该功能]
-        var ldPowerRes = InitProbe(50); 
+        Console.WriteLine("----------LASERRRRR!!!!: " + DataPacketedService.Ldcurrent);
+        var ldPowerRes = InitProbe(DataPacketedService.Ldcurrent); 
         byte mode = 0;
 
         if (acquireMethod == AcquireMethod.HighPrecision)

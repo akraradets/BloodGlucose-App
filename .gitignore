@@ -2,3 +2,4 @@ backend_dotnet/bin
 backend_dotnet/obj
 backend_dotnet/.vs
 .DS_Store
+__pycache__

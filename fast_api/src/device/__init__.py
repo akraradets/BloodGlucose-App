@@ -104,6 +104,8 @@ class CCD(BaseModel):
     time: datetime
     duration: timedelta
     data: list[float]
+    corrected_data: list[float]
+    data_type: str
 
 
 @router.websocket("/ws/ccd")
@@ -113,11 +115,57 @@ async def read_ccd(websocket: WebSocket):
         while True:
             action:str = await websocket.receive_text()
             if(action == "read_ccd"):
+                prev_data = None
                 for ccd in stub.ReadCCD(raman_pb2.Empty()):
                     data = CCD(time=ccd.time.ToDatetime(), 
                                duration=timedelta(seconds=ccd.duration.seconds + ccd.duration.nanos*1e-9), 
-                               data=ccd.data
+                               data=ccd.data,
+                               corrected_data=baseline_correction(np.array(ccd.data)).tolist(),
+                               data_type=ccd.data_type
                                )
+                    # if(data.data_type == 'signal'):
+                    #     print(np.array(data.data).shape)
+                    #     data.data = (np.array(data.data) - np.array(prev_data.data)).tolist()
+                    #     data.corrected_data = baseline_correction(np.array(data.data)).tolist()
+                    #     data.data_type = 'spectrum'
                     await manager.send_personal_message(data.model_dump_json(), websocket)
+                    prev_data = data
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+def baseline_correction(signal: np.ndarray):
+    window_size:int = 7
+    baseline_signal: np.ndarray = signal.copy()
+    original_signal_itera: np.ndarray = signal.copy()
+
+    for _ in range(20):
+        start_window:int = (window_size - 1) // 2
+        end_window  :int = (window_size + 1) // 2
+        # This is padding
+        # ([a[0]] * 3) + a + ([a[-1]] * 3)
+        original_signal_itera_before: list[float] = ([original_signal_itera[0]] * start_window) + original_signal_itera.tolist() + ([original_signal_itera[-1]] * end_window )
+        # for temp1 in range(start_window):
+        #     original_signal_itera_before.append(original_signal_itera[temp1])
+        #     for j in original_signal_itera:
+        #         original_signal_itera_before.append(j)
+        #     original_signal_itera_before[-1] = original_signal_itera[-1]
+        #     original_signal_itera = np.array(original_signal_itera_before)
+
+        original_signal_itera_after: list[float] = []
+        for temp1 in range(len(signal)):
+            _Temporigin_signal_itera_before:list[float] = []
+            for j in range(temp1 + window_size - temp1):
+                _Temporigin_signal_itera_before.append(original_signal_itera_before[j + temp1])
+            avg:float = sum(_Temporigin_signal_itera_before)/len(_Temporigin_signal_itera_before)
+            original_signal_itera_after.append(avg)
+
+
+        r1:np.ndarray = np.array(baseline_signal) - np.array(original_signal_itera_after)
+        for idx, point in enumerate(r1):
+            if point > 0:
+                baseline_signal[idx] = original_signal_itera_after[idx]
+        window_size = window_size + 4
+        original_signal_itera = baseline_signal.copy()
+
+    corrected_signal: np.ndarray = signal - baseline_signal
+    return corrected_signal

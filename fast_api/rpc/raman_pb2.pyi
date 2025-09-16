@@ -59,14 +59,16 @@ class DeviceStatus(_message.Message):
     def __init__(self, IsConnected: bool = ..., device: _Optional[_Union[Device, _Mapping]] = ..., laser_power: _Optional[int] = ..., exposure: _Optional[int] = ..., accumulations: _Optional[int] = ...) -> None: ...
 
 class CCD(_message.Message):
-    __slots__ = ("time", "duration", "data")
+    __slots__ = ("time", "duration", "data_type", "data")
     TIME_FIELD_NUMBER: _ClassVar[int]
     DURATION_FIELD_NUMBER: _ClassVar[int]
+    DATA_TYPE_FIELD_NUMBER: _ClassVar[int]
     DATA_FIELD_NUMBER: _ClassVar[int]
     time: _timestamp_pb2.Timestamp
     duration: _duration_pb2.Duration
+    data_type: str
     data: _containers.RepeatedScalarFieldContainer[float]
-    def __init__(self, time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., duration: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., data: _Optional[_Iterable[float]] = ...) -> None: ...
+    def __init__(self, time: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., duration: _Optional[_Union[datetime.timedelta, _duration_pb2.Duration, _Mapping]] = ..., data_type: _Optional[str] = ..., data: _Optional[_Iterable[float]] = ...) -> None: ...
 
 class MeasureConfRequest(_message.Message):
     __slots__ = ("laser_power", "exposure", "accumulations")

@@ -32,6 +32,8 @@ class Serial
     #region config
     public int EXPOSE_TIME = 1000;
     public readonly int CCD_DATA_PACK_SIZE = 3648;
+    public static int nBoxWidth = 0;
+    public static string Smooth_Level = "NONE";
     #endregion
 
     private SerialPort _serial_port;
@@ -217,6 +219,7 @@ class Serial
     #region READ DATA helper
     private bool _read_data__is_data_here()
     {
+        //Have_Receive_Data
         _logger.LogDebug("_read_data__is_data_here: start");
         int checksum = 0;
         for (int i = 2; i < bytes_toread.Count - 1; i++)
@@ -241,6 +244,7 @@ class Serial
     }
     private int _read_data__is_valid()
     {
+        //Check_Receive_Data
         _logger.LogDebug("_read_data__is_valid: start");
         int len = (bytes_toread[0] << 8) + bytes_toread[1] - 2;
         if (len < 3)
@@ -342,12 +346,74 @@ class Serial
     #endregion
 
     #region Public Interface
+
+    public double[] read_dark_ccd()
+    {
+        //Read_dark_Data_Atime
+        double[] refdata = new double[CCD_DATA_PACK_SIZE];
+        for (int i = 0; i < refdata.Length; i++)
+        {
+            refdata[i] = 0;
+        }
+        _logger.LogDebug("read_dark_ccd: calling `cmd(rccddark_cmd)`");
+        bytes_toread_dark.Clear();
+        if (!cmd(rccddark_cmd))
+        {
+            throw new RpcException((new Status(StatusCode.Internal, "cmd(rccddark_cmd) failed")));
+        }
+
+        //Thread.Sleep(Expose_Time*15/10);
+        _logger.LogDebug("read_read_dark_ccd: calling `cmd_ccd_data_read`");
+        if (!cmd_ccd_data_read())
+            throw new RpcException((new Status(StatusCode.Internal, "ccd_data_read failed")));
+
+
+        for(int i = 0; i < bytes_toread.Count; i++)
+        {
+            bytes_toread_dark.Add(bytes_toread[i]);
+        }
+        bytes_toread_dark.RemoveAt(0);
+
+        for (int k = 0; k < bytes_toread_dark.Count; k += 2)
+        {
+            int a = bytes_toread_dark[k];
+            int b = bytes_toread_dark[k + 1];
+            int u = k / 2;
+            refdata[u] = a * 256 + b;
+        }
+        //string msg = "";
+        //for (int i = 0; i < bytes_toread.Count; i += 2)
+        //{
+        //    int a = bytes_toread[i];
+        //    int b = bytes_toread[i + 1];
+
+        //    int k = i / 2;
+        //    refdata[k] = a * 256 + b;
+        //    a = bytes_toread[i];
+        //    b = bytes_toread[i + 1];
+        //    msg += $"{k}:{a * 256 + b} ";
+        //    //KRaw[k] = a * 256 + b;
+
+        //}
+        //bytes_toread.Clear();
+        //_logger.LogDebug($"read_read_dark_ccd: {msg}");
+        boxProcess(refdata);
+        return refdata;
+    }
+
     public double[] read_ccd(byte mode)
     {
+        //Read_Ccd_Data
+
         //if (IS_ARMED == false)
         //    throw new RpcException(new Status(StatusCode.FailedPrecondition, "Forget to arm the read_ccd"));
 
         double[] refdata = new double[CCD_DATA_PACK_SIZE];
+        for (int i = 0; i < refdata.Length; i++)
+        {
+            refdata[i] = 0;
+        }
+        //Read_Ccd_Data_Atime
         _logger.LogDebug("read_ccd: calling `cmd_start_ccd_scan_packet`");
         if (!cmd_start_ccd_scan_packet(mode))
             throw new RpcException((new Status(StatusCode.Internal, "start_scan_packet failed")));
@@ -368,13 +434,15 @@ class Serial
 
             int k = i / 2;
             refdata[k] = a * 256 + b;
-            a = bytes_toread[i];
-            b = bytes_toread[i + 1];
-            msg += $"{k}:{a * 256 + b} ";
+            //a = bytes_toread[i];
+            //b = bytes_toread[i + 1];
+            //msg += $"{k}:{a * 256 + b} ";
             //KRaw[k] = a * 256 + b;
 
         }
-        _logger.LogDebug($"read_ccd: {msg}");
+        //bytes_toread.Clear();
+        //_logger.LogDebug($"read_ccd: {msg}");
+        boxProcess(refdata);
         return refdata;
     }
 
@@ -399,5 +467,59 @@ class Serial
         }
         return result;
     }
+    #endregion
+
+    #region Signal Processing
+    private void boxProcess(double[] refdata)
+    {
+        int smooth_level = 0;
+        if (nBoxWidth == 0)
+            return;
+        if (nBoxWidth == 1)
+        {
+            smooth_level = 4;
+        }
+        if (nBoxWidth == 2)
+        {
+            smooth_level = 5;
+        }
+        int i, j, k;
+        double sum;
+
+        for (i = 0; i < smooth_level; i++)
+        {
+            sum = 0;
+            k = Math.Min(i + smooth_level + 1, refdata.Length);
+            for (j = 0; j < k; j++)
+            {
+                sum += refdata[j];
+            }
+            refdata[i] = sum / k;
+        }
+
+        k = 2 * smooth_level + 1;
+        for (i = smooth_level; i < refdata.Length - smooth_level; i++)
+        {
+            sum = 0;
+            for (j = i - smooth_level; j < i + smooth_level + 1; j++)
+            {
+                sum += refdata[j];
+            }
+            refdata[i] = sum / k;
+        }
+
+        for (i = refdata.Length - smooth_level; i < refdata.Length; i++)
+        {
+            sum = 0;
+            k = smooth_level + CCD_DATA_PACK_SIZE - i;
+            for (j = i - smooth_level; j < refdata.Length; j++)
+            {
+                sum += refdata[j];
+            }
+            refdata[i] = sum / k;
+        }
+
+    }
+
     #endregion
 }

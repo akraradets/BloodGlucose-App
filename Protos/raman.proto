@@ -47,8 +47,9 @@ message DeviceStatus {
 
 message CCD{
   google.protobuf.Timestamp time = 1;
-  google.protobuf.Duration duration = 3;
-  repeated double data = 2;
+  google.protobuf.Duration duration = 2;
+  string data_type = 3;
+  repeated double data = 4;
 }
 
 message MeasureConfRequest{

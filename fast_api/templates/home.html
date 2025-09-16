@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="row">
-    <div class="col-lg-8 order-2 order-lg-1" style="background-color: aliceblue;">
-      {% include "component/chart.html" %}
-    </div>
-    <div class="col-lg-4 order-1 order-lg-2" style="background-color: aqua;">
-      {% include "component/device.html" %}
-    </div>
+    {% include "component/collection_info.html" %}
   </div>
 {% endblock %}

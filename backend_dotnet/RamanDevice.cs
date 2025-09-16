@@ -190,12 +190,36 @@ public class RamanDevice
         {
             byte mode = 0;
             //if (acquireMethod == AcquireMethod.HighPrecision)
-            //    mode = 0x01;
-
+            mode = 0x01;
+            _serial.set_laser_power(_laser_power);
             ccd_data_temp = _serial.read_ccd(mode);
         }
         return ccd_data_temp;
     }
+    public double[] read_dark_data()
+    {
+        if (!_is_connected) throw new RpcException(new Status(StatusCode.Aborted, $"Device is disconnected"));
+
+        double[] ccd_data_temp = new double[_CCD_PACKET_SIZE];
+
+        if (_device.Name == "Mock")
+        {
+            Random rnd = new();
+            for (int i = 0; i < _CCD_PACKET_SIZE; i++)
+            {
+                ccd_data_temp[i] = Math.Round(rnd.NextDouble() * 1000, 2);
+            }
+            // sleep 1000 ms
+            Thread.Sleep(1000);
+        }
+        else
+        {
+            _serial.set_laser_power(0);
+            ccd_data_temp = _serial.read_dark_ccd();
+        }
+        return ccd_data_temp;
+    }
+
     public bool set_laser(int laser_power)
     {
         if (!_is_connected) throw new RpcException(new Status(StatusCode.Aborted, $"Device is disconnected"));

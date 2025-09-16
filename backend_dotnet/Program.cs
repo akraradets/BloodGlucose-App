@@ -1,11 +1,13 @@
 using backend_dotnet;
 using backend_dotnet.Services;
+using backend_dotnet.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
 builder.Services.AddSingleton<RamanDevice>();
+builder.Services.AddSingleton<ATRWrapper>();
 
 var app = builder.Build();
 

@@ -34,7 +34,7 @@
           </div>
         </div>
       </fieldset>
-      <button id="btn-read-ccd" type="button" class="btn btn-sm btn-outline-info" onclick="read_ccd()" disabled>Stream CCD</button>
+      <button id="btn-read-ccd" type="button" class="btn btn-sm btn-outline-info" onclick="read_ccd()">Stream CCD</button>
     </div>
       
   </div>
@@ -81,7 +81,8 @@
   });
   // Listen for messages
   socket_ccd.addEventListener("message", (event) => {
-    console.log("Message from server ", event.data);
+    //console.log("Message from server ", event.data);
+    console.log(JSON.parse(event.data));
     draw_chart(JSON.parse(event.data));
     //if(data.type === "spectrum"){
       // Dispatch event
@@ -184,9 +185,9 @@
         console.log(result);
         result = JSON.parse(result);
         set_status(result);
-        if(result.IsConnected){
+        //if(result.IsConnected){
           socket_ccd.send("read_ccd");
-        }
+        //}
       })
       .catch((error) => console.error(error));
   }

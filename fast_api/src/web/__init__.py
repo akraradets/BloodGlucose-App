@@ -17,10 +17,10 @@ async def get_homepage(request: Request) -> HTMLResponse:
     # return templates.TemplateResponse("homepage.html", {"request": request})
     return templates.TemplateResponse(name="home.html", context={"request": request})
 
-@router.get("/blood", response_class=HTMLResponse)
-async def get_blood(request: Request) -> HTMLResponse:
+@router.get("/device_control", response_class=HTMLResponse)
+async def get_device_control(request: Request) -> HTMLResponse:
     # return templates.TemplateResponse("homepage.html", {"request": request})
-    return templates.TemplateResponse(name="blood.html", context={"request": request})
+    return templates.TemplateResponse(name="device_control.html", context={"request": request})
 
 # async def get_item(request: Request, id: str) -> HTMLResponse:
 #     return templates.TemplateResponse(
