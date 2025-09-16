@@ -1,0 +1,105 @@
+<!-- Modal -->
+<div class="modal fade" id="measureModal" tabindex="-1" aria-labelledby="measureModalLabel" aria-hidden="true">
+  <div class="modal-dialog  modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist" hidden>
+          <li class="nav-item" role="presentation" hidden>
+            <button class="nav-link active" id="page1-tab" data-bs-target="#page1" type="button" role="tab"
+              aria-controls="page1" aria-selected="true">page1</button>
+          </li>
+          <li class="nav-item" role="presentation" hidden>
+            <button class="nav-link" id="page2-tab" data-bs-target="#page2" type="button" role="tab"
+              aria-controls="page2" aria-selected="false">page2</button>
+          </li>
+          <li class="nav-item" role="presentation" hidden>
+            <button class="nav-link" id="page3-tab" data-bs-target="#page3" type="button" role="tab"
+              aria-controls="page3" aria-selected="false">page3</button>
+          </li>
+          <li class="nav-item" role="presentation" hidden>
+            <button class="nav-link" id="page4-tab" data-bs-target="#page4" type="button" role="tab"
+              aria-controls="page4" aria-selected="false">page4</button>
+          </li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+
+          <div class="tab-pane fade show active" id="page1" role="tabpanel" aria-labelledby="page1-tab" tabindex="0">
+            <div class="position-relative" style="height: 300px;">
+              <div class="position-absolute top-50 start-50 translate-middle">
+                Please position your finger
+              </div>
+
+              <button class="position-absolute bottom-0 end-0 btn btn-primary btn-lg" type="button"
+                onclick="showpage2()">Next</button>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="page2" role="tabpanel" aria-labelledby="page2-tab" tabindex="0">
+            <div class="position-relative" style="height: 300px;">
+              <div class="position-absolute top-50 start-50 translate-middle">
+                Click Start to begin collection
+              </div>
+              <button class="position-absolute bottom-0 btn btn-primary btn-lg" type="button"
+                onclick="showpage1()">Back</button>
+              <button class="position-absolute bottom-0 end-0 btn btn-primary btn-lg" type="button"
+                onclick="showpage3()">Start</button>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="page3" role="tabpanel" aria-labelledby="page3-tab" tabindex="0">
+            <div class="position-relative" style="height: 300px;">
+              <div class="position-absolute top-50 start-50 translate-middle">
+                <div class="spinner-grow" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <button class="position-absolute bottom-0 end-0 btn btn-primary" type="button"
+                onclick="showpage4()">page4</button>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="page4" role="tabpanel" aria-labelledby="page4-tab" tabindex="0">
+            <div class="position-relative" style="height: 300px;">
+              <div class="position-absolute top-50 start-50 translate-middle text-center">
+                <div class="row">
+                  <h1 class="display-1" style="color:grey"><b>60</b></h1><br>
+
+                </div>
+                <div class="row">
+
+                  <small class="text-body-secondary mx-auto">mg/dL</small>
+                </div>
+              </div>
+              <button class="position-absolute bottom-0 end-0 btn btn-primary" type="button"
+                onclick="showpage4()">page4</button>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+      <!-- <div class="modal-footer"> -->
+      <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button> -->
+      <!-- </div> -->
+    </div>
+  </div>
+</div>
+
+<script>
+  function showpage1() {
+    new bootstrap.Tab('#myTab button[data-bs-target="#page1"]').show() // Select tab by name
+  }
+  function showpage2() {
+    new bootstrap.Tab('#myTab button[data-bs-target="#page2"]').show() // Select tab by name
+  }
+  function showpage3() {
+    new bootstrap.Tab('#myTab button[data-bs-target="#page3"]').show() // Select tab by name
+  }
+  function showpage4() {
+    new bootstrap.Tab('#myTab button[data-bs-target="#page4"]').show() // Select tab by name
+  }
+</script>

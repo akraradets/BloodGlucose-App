@@ -1,8 +1,64 @@
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Personal Data</h5>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
-    <a href="#" class="card-link">Card link</a>
-    <a href="#" class="card-link">Another link</a>
+    <h5 class="card-title">Information</h5>
+    <form>
+      <div class="mb-3">
+        <label for="fullname" class="form-label">Name</label>
+        <input type="text" class="form-control" id="fullname">
+      </div>
+      <div class="mb-3 row">
+        <div class="col-6">
+          <label for="col-date" class="form-label">Collecting Date</label>
+          <input type="date" class="form-control" id="col-date" name="col-date" value="{{ date }}">
+        </div>
+        <div class="col-6">
+          <label for="col-time" class="form-label">Time</label>
+          <input type="time" class="form-control" id="col-time" name="col-time" value="{{ time }}">
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Meal</label><br>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="meal" id="meal1" value="1">
+          <label class="form-check-label" for="meal1">
+            <i class="bi bi-cup-hot"></i> Breakfast
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="meal" id="meal2" value="2">
+          <label class="form-check-label" for="meal2">
+            <i class="bi bi-egg"></i> Lunch
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="meal" id="meal3" value="3">
+          <label class="form-check-label" for="meal3">
+            <i class="bi bi-fork-knife"></i> Dinner
+          </label>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Before/After</label><br>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="before_after" id="before_after1" value="1">
+          <label class="form-check-label" for="before_after1">
+            Before
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="before_after" id="before_after2" value="2">
+          <label class="form-check-label" for="before_after2">
+            After
+          </label>
+        </div>
+      </div>
+      <div class="d-grid gap-2 col-8 mx-auto">
+        <button type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#measureModal">
+          Start Collection
+        </button>
+      </div>
+    </form>
   </div>
 </div>
+
+{% include "component/collection-modal.html" %}
