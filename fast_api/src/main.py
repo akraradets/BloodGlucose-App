@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from src.web import router as web_routers
 from src.device import router as device_routers
+from src.raman import router as raman_routers
 import os 
 _build_version = os.environ.get("BUILD_VERSION", "DEV")
 @asynccontextmanager
@@ -21,7 +22,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(web_routers)
 app.include_router(device_routers, prefix="/api/device")
-# app.include_router(web_routers, prefix="")
+app.include_router(raman_routers, prefix="/api/raman")
 
 
 @app.get("/")

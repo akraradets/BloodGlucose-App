@@ -231,7 +231,14 @@ public class RamanDevice
 
         _laser_power = laser_power;
         _logger.LogInformation($"set_laser = {laser_power}");
-        if (_serial.set_laser_power(laser_power)) return true;
+        if(_device.Name == "Mock")
+        {
+            return true;
+        }
+        else
+        {
+            if (_serial.set_laser_power(laser_power)) return true;
+        }
 
         // fail to set: fall back to 0
         _laser_power = 0;
@@ -249,7 +256,14 @@ public class RamanDevice
 
         _exposure = exposure;
         _logger.LogInformation($"set_exposure = {exposure}");
-        if (_serial.set_exposure(exposure)) return true;
+        if (_device.Name == "Mock")
+        {
+            return true;
+        }
+        else
+        {
+            if (_serial.set_exposure(exposure)) return true;
+        }
 
         // fail to set: fall back to 1000
         _exposure = 1000;

@@ -17,7 +17,7 @@ public class RamanService : Raman.RamanBase
     {
         _logger = logger;
         _ramanDevice = ramanDevice;
-        _wrapper = wrapper;
+        //_wrapper = wrapper;
     }
     public override Task<DeviceList> GetDeviceList(Empty request, ServerCallContext context)
     {
@@ -34,9 +34,9 @@ public class RamanService : Raman.RamanBase
         _logger.LogInformation($"Connect: request={request}, index={request.Index}");
         try
         {
-            bool result = _wrapper.OpenDevice("COM6");
-            _logger.LogInformation($"Connect: {result}");
-            //bool result = _ramanDevice.connect(request.Index);
+            //bool result = _wrapper.OpenDevice("COM6");
+            //_logger.LogInformation($"Connect: {result}");
+            bool result = _ramanDevice.connect(request.Index);
             if (result == false)
             {
                 throw new Exception("OpenDevice Fail");
@@ -78,17 +78,17 @@ public class RamanService : Raman.RamanBase
                 sample.Time = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
-                _logger.LogInformation($"--reading dark CCD");
-                _wrapper.SetLdPower(200, 1);
-                _wrapper.SetIntegrationTime(5000);
+                //_logger.LogInformation($"--reading dark CCD");
+                //_wrapper.SetLdPower(200, 1);
+                //_wrapper.SetIntegrationTime(5000);
                 //_wrapper.SetLdPower(200);
-                Spectrum spectrum = _wrapper.AcquireSpectrum(AcquireMethod.HighPrecision);
+                //Spectrum spectrum = _wrapper.AcquireSpectrum(AcquireMethod.HighPrecision);
                 //Spectrum spectrum = _wrapper.AcquireDarkSpectrum();
-                //double[] ccd_data = _ramanDevice.read_dark_data();
+                double[] ccd_data = _ramanDevice.read_ccd_data();
 
                 for (int i = 0; i < 2048; i++)
                 {
-                    sample.Data.Add(spectrum.Data[i]);
+                    sample.Data.Add(ccd_data[i]);
                 }
                 stopwatch.Stop();
                 sample.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);
@@ -125,21 +125,21 @@ public class RamanService : Raman.RamanBase
     public override Task<DeviceStatus> SetMeasureConf(MeasureConfRequest request, ServerCallContext context)
     {
 
-        _wrapper.SetLdPower(200);
-        _wrapper.SetIntegrationTime(3);
-        //_logger.LogInformation($"set mesaure config with {request}");
-        //if (_ramanDevice.set_laser(request.LaserPower) == false)
-        //{
-        //    throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_laser. This should not happen"));
-        //}
-        //if(_ramanDevice.set_exposure(request.Exposure) == false)
-        //{
-        //    throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_exposure. This should not happen"));
-        //}
-        //if (_ramanDevice.set_accumulation(request.Accumulations) == false)
-        //{
-        //    throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_accumulation. This should not happen"));
-        //}
+        //_wrapper.SetLdPower(200);
+        //_wrapper.SetIntegrationTime(3);
+        _logger.LogInformation($"set mesaure config with {request}");
+        if (_ramanDevice.set_laser(request.LaserPower) == false)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_laser. This should not happen"));
+        }
+        if (_ramanDevice.set_exposure(request.Exposure) == false)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_exposure. This should not happen"));
+        }
+        if (_ramanDevice.set_accumulation(request.Accumulations) == false)
+        {
+            throw new RpcException(new Status(StatusCode.Internal, "Something wrong during set_accumulation. This should not happen"));
+        }
         return Task.FromResult(_ramanDevice.GetStatus());
     }
 }

@@ -19,19 +19,19 @@
       <div class="mb-3">
         <label class="form-label">Meal</label><br>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="meal" id="meal1" value="1">
+          <input class="form-check-input" type="radio" name="meal" id="meal1" value="breakfast">
           <label class="form-check-label" for="meal1">
             <i class="bi bi-cup-hot"></i> Breakfast
           </label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="meal" id="meal2" value="2">
+          <input class="form-check-input" type="radio" name="meal" id="meal2" value="lunch">
           <label class="form-check-label" for="meal2">
             <i class="bi bi-egg"></i> Lunch
           </label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="meal" id="meal3" value="3">
+          <input class="form-check-input" type="radio" name="meal" id="meal3" value="dinner">
           <label class="form-check-label" for="meal3">
             <i class="bi bi-fork-knife"></i> Dinner
           </label>
@@ -40,25 +40,75 @@
       <div class="mb-3">
         <label class="form-label">Before/After</label><br>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="before_after" id="before_after1" value="1">
+          <input class="form-check-input" type="radio" name="before_after" id="before_after1" value="before">
           <label class="form-check-label" for="before_after1">
             Before
           </label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="before_after" id="before_after2" value="2">
+          <input class="form-check-input" type="radio" name="before_after" id="before_after2" value="after">
           <label class="form-check-label" for="before_after2">
             After
           </label>
         </div>
       </div>
       <div class="d-grid gap-2 col-8 mx-auto">
-        <button type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#measureModal">
+        <button type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal"
+          data-bs-target="#measureModal">
           Start Collection
         </button>
+      </div>
+      <div class="text-center mb-3">
+        <h1 id="glucose-value" class="display-1" style="color:grey; font-weight: bold;">--.-</h1>
+        <small class="text-body-secondary mx-auto">mg/dL</small>
+      </div>
+      <div class="d-grid gap-2 col-8 mx-auto">
+        <button id="save-btn" type="button" class="btn btn-success btn-lg" onclick="save()">Save</button>
       </div>
     </form>
   </div>
 </div>
 
 {% include "component/collection-modal.html" %}
+
+<script>
+  function save() {
+
+    console.log("SAVE!!!");
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    const timestamp = new Date(`${document.getElementById("col-date").value}T${document.getElementById("col-time").value}`).toISOString();
+
+    const meal = document.querySelector('input[name="meal"]:checked').value;
+    const before_after = document.querySelector('input[name="before_after"]:checked').value;
+    const glucose = parseFloat(document.getElementById("glucose-value").innerText);
+    const raw = {
+      "name": document.getElementById("fullname").value,
+      "timestamp": timestamp,
+      "meal": meal,
+      "before_after": before_after,
+      "glucose": glucose,
+    }
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(raw),
+      redirect: "follow"
+    };
+    fetch("http://localhost:8000/api/raman/save", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log(result);
+        result = JSON.parse(result);
+        if (result.status == "success") {
+          alert("Saved successfully!");
+          window.location.href = "/";
+        } else {
+          alert("Error saving data");
+        }
+      })
+      .catch((error) => console.error(error));
+  }
+</script>

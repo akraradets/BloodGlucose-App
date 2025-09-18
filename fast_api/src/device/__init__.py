@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -5,6 +6,7 @@ from datetime import datetime, timedelta
 import grpc
 import os
 import numpy as np
+import json
 from rpc import raman_pb2, raman_pb2_grpc
 
 
@@ -150,8 +152,8 @@ def baseline_correction(signal: np.ndarray):
         #         original_signal_itera_before.append(j)
         #     original_signal_itera_before[-1] = original_signal_itera[-1]
         #     original_signal_itera = np.array(original_signal_itera_before)
-
         original_signal_itera_after: list[float] = []
+
         for temp1 in range(len(signal)):
             _Temporigin_signal_itera_before:list[float] = []
             for j in range(temp1 + window_size - temp1):
@@ -169,3 +171,45 @@ def baseline_correction(signal: np.ndarray):
 
     corrected_signal: np.ndarray = signal - baseline_signal
     return corrected_signal
+
+class ClientMessage(BaseModel):
+    action: str
+
+class ServerMessage(BaseModel):
+    is_ok: bool
+    data: dict | None = None
+    message: str | None = None
+    detail: str | None = None
+    progress: float | None = None
+
+@router.websocket("/ws/measure")
+async def ws_measure(websocket: WebSocket):
+    await manager.connect(websocket)
+    raw:str
+    try:
+        while True:
+            raw = await websocket.receive_text()
+            cli_msg:ClientMessage = ClientMessage(**json.loads(raw))
+            serv_msg:ServerMessage
+            if(cli_msg.action == "arming"):
+                serv_msg = ServerMessage(is_ok=True, message="Device is arming...")
+            elif(cli_msg.action == "start"):
+                serv_msg = ServerMessage(is_ok=True, message="Device is initializing...", progress=10.0)
+                await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
+                await asyncio.sleep(2)
+                for idx, progress in enumerate([30,50,70]):
+                    serv_msg = ServerMessage(is_ok=True, message=f"Measuring sample {idx+1}", progress=progress)
+                    await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
+                    await asyncio.sleep(2)
+                serv_msg = ServerMessage(is_ok=True, message=f"Calculating...", progress=85)
+                await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
+                await asyncio.sleep(2)
+                serv_msg = ServerMessage(is_ok=True, message=f"Complete", progress=100.0, data={"glucose": round(np.random.rand()*100,1)})
+            else:
+                serv_msg = ServerMessage(is_ok=False, detail="Unknown action")
+            await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
+    except json.decoder.JSONDecodeError:
+        serv_msg = ServerMessage(is_ok=False, detail=f"Invalid message format | {raw=}")
+        await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
