@@ -63,7 +63,7 @@
         <small class="text-body-secondary mx-auto">mg/dL</small>
       </div>
       <div class="d-grid gap-2 col-8 mx-auto">
-        <button id="save-btn" type="button" class="btn btn-success btn-lg" onclick="save()">Save</button>
+        <button id="save-btn" type="button" class="btn btn-success btn-lg" onclick="save()" hidden>Save</button>
       </div>
     </form>
   </div>
@@ -88,6 +88,7 @@
       "meal": meal,
       "before_after": before_after,
       "glucose": glucose,
+      "spectrum": signals
     }
     const requestOptions = {
       method: "POST",

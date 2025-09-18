@@ -27,7 +27,7 @@ class BloodCollection(BaseModel):
     meal: str
     before_after: str
     glucose: float
-    spectrum: dict[str, list[float]] | None = None
+    spectrum: dict[str, Any] | None = None
     collection_meta: dict[str, Any] | None = None
 
 @router.post("/save", response_class=JSONResponse)

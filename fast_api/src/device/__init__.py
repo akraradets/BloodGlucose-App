@@ -54,7 +54,6 @@ class DeviceStatus(BaseModel):
 @router.get("/connect/{index}", response_class=JSONResponse)
 def get_device_connect(index: int) -> DeviceStatus:
     status:raman_pb2.DeviceStatus = stub.Connect(raman_pb2.ConnectRequest(index=index))
-
     return status
 
 
@@ -106,7 +105,7 @@ class CCD(BaseModel):
     time: datetime
     duration: timedelta
     data: list[float]
-    corrected_data: list[float]
+    corrected_data: list[float] | None = None
     data_type: str
 
 
@@ -196,15 +195,32 @@ async def ws_measure(websocket: WebSocket):
             elif(cli_msg.action == "start"):
                 serv_msg = ServerMessage(is_ok=True, message="Device is initializing...", progress=10.0)
                 await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
-                await asyncio.sleep(2)
-                for idx, progress in enumerate([30,50,70]):
-                    serv_msg = ServerMessage(is_ok=True, message=f"Measuring sample {idx+1}", progress=progress)
+                devices:list[Device] = get_device_list()
+
+                status:DeviceStatus = get_device_connect(1)
+                if(status.IsConnected == False):
+                    serv_msg = ServerMessage(is_ok=False, detail="Device is not connected", data={"device_status": status.model_dump()})
                     await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
-                    await asyncio.sleep(2)
+                    continue
+
+                status:DeviceStatus = get_device_measure_conf(laser_power=100, exposure=2000, accumulation=3)
+                # await asyncio.sleep(2)
+                signal:np.ndarray = None
+                for idx, progress in enumerate([30,50,70]):
+                    for ccd in stub.ReadCCD(raman_pb2.Empty()):
+                        data = CCD(time=ccd.time.ToDatetime(), 
+                            duration=timedelta(seconds=ccd.duration.seconds + ccd.duration.nanos*1e-9), 
+                            data=ccd.data,
+                            data_type=ccd.data_type
+                            )
+                        
+                        signal = np.array(ccd.data) if signal is None else signal + np.array(ccd.data)
+                    serv_msg = ServerMessage(is_ok=True, message=f"Measuring sample {idx+1}", progress=progress, data={"ccd": data.model_dump()})
+                    await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
                 serv_msg = ServerMessage(is_ok=True, message=f"Calculating...", progress=85)
                 await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
-                await asyncio.sleep(2)
-                serv_msg = ServerMessage(is_ok=True, message=f"Complete", progress=100.0, data={"glucose": round(np.random.rand()*100,1)})
+                glucose = await predict(signal)
+                serv_msg = ServerMessage(is_ok=True, message=f"Complete", progress=100.0, data={"glucose": glucose})
             else:
                 serv_msg = ServerMessage(is_ok=False, detail="Unknown action")
             await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
@@ -213,3 +229,7 @@ async def ws_measure(websocket: WebSocket):
         await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+async def predict(signal: np.ndarray):
+    asyncio.sleep(2)
+    return round(np.random.rand()*100,1)

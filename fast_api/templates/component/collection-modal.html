@@ -98,7 +98,8 @@
 
 <script>
   var socket_ccd;
-  var glucose; 
+  var glucose;
+  var signals = {};
   function send_action(action){
     client_msg = {
       "action": action
@@ -129,6 +130,7 @@
     socket_ccd = new WebSocket("ws://localhost:8000/api/device/ws/measure");
     socket_ccd.addEventListener("open", (event) => {
       send_action("start");
+      signals = {};
     });
     // Listen for messages
     socket_ccd.addEventListener("message", (event) => {
@@ -138,6 +140,9 @@
         alert(event.data);
       }
       else{
+        if(serv_msg.data && serv_msg.data.ccd){
+          signals[`ccd${Object.keys(signals).length}`] = serv_msg.data.ccd
+        }
         update_progress(serv_msg);
       }
     });
