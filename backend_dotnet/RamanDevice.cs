@@ -23,6 +23,7 @@ public class RamanDevice
     private readonly Serial _serial;
     private DeviceList _device_list = new();
     private Device _device = new();
+    private int _temperature = 0;
     private int _laser_power = 0;
     private int _exposure = 1000;
     public  int _accumulation = 1;
@@ -60,6 +61,7 @@ public class RamanDevice
             status.LaserPower = _laser_power;
             status.Exposure = _exposure;
             status.Accumulations = _accumulation;
+            status.Temperature = get_cool();
         }
         return status;
     }
@@ -224,7 +226,7 @@ public class RamanDevice
     {
         if (!_is_connected) throw new RpcException(new Status(StatusCode.Aborted, $"Device is disconnected"));
 
-        if (laser_power < 0 || laser_power > 150)
+        if (laser_power < 0 || laser_power >= 350)
         {
             throw new RpcException(new Status(StatusCode.InvalidArgument, $"laser_power must be in [0,150] but got {laser_power}"));
         }
@@ -277,5 +279,40 @@ public class RamanDevice
         _accumulation = accumulation;
         _logger.LogInformation($"set_accumulation = {accumulation}");
         return true;
+    }
+
+    public bool set_cool(int temperature)
+    {
+        if (!_is_connected) throw new RpcException(new Status(StatusCode.Aborted, $"Device is disconnected"));
+
+        if (temperature < -5 || temperature > 25)
+            throw new RpcException(new Status(StatusCode.InvalidArgument, $"the temperature must be in (-5, 25) but got temperature={temperature}"));
+        _temperature = temperature;
+        _logger.LogInformation($"set_cool = {temperature}");
+        if (_device.Name == "Mock")
+        {
+            return true;
+        }
+        else
+        {
+            if (_serial.set_temperature(temperature)) return true;
+        }
+        // fail to set: fall back to 0
+        _temperature = 0;
+        throw new RpcException(new Status(StatusCode.Unknown, "_serial.set_cool return false. This should not happen."));
+    }
+
+    public float get_cool()
+    {
+        if (!_is_connected) throw new RpcException(new Status(StatusCode.Aborted, $"Device is disconnected"));
+
+        var value = 0f;
+        string temp = _serial.get_temperature();
+        if(!float.TryParse(temp, out value))
+        {
+            throw new RpcException(new Status(StatusCode.Internal, $"The vaule={temp} is not a float"));
+        }
+        return value;
+
     }
 }

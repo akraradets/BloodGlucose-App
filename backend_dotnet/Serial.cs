@@ -213,6 +213,31 @@ class Serial
         return is_read_ok();
     }
 
+    private bool cmd_set_temperature(byte[] data)
+    {
+        block_clear();
+        block_head();
+        block_len(4 + data.Length);
+        block_cmd(wtectmp_cmd);
+        block_content(data);
+        block_checksum();
+        serial_send();
+        return is_read_ok();
+    }
+
+    private bool cmd_get_temperature(byte[] data)
+    {
+        block_clear();
+        block_head();
+        block_len(5);
+        block_cmd(rtectmp_cmd);
+        data[0] = 0;
+        block_content(data);
+        block_checksum();
+        serial_send();
+        return is_read_ok();
+    }
+
     #endregion
 
 
@@ -468,6 +493,51 @@ class Serial
         return result;
     }
     #endregion
+
+    public bool set_temperature(int temperature)
+    {
+        byte[] data = new byte[2];
+        if (temperature < 0)
+            data[0] = 0xff;
+        else
+            data[0] = 0x00;
+        data[1] = (byte)(Math.Abs(temperature) & 0xff);
+        bool result = cmd_set_temperature(data);
+        return result;
+    }
+
+    public string get_temperature()
+    {
+        byte[] data = new byte[1];
+        byte[] tecdata = new byte[5];
+        bool result = cmd_get_temperature(data);
+        if (result)
+        {
+            for(int i = 0; i < bytes_toread.Count; i++)
+            {
+                tecdata[i] = bytes_toread[i];
+                Console.WriteLine($"============================== TEMP[{i}] = {bytes_toread[i]}");
+            }
+            //for (int i = 0; i < bytes_toread.Count; i += 2)
+            //{
+            //    int a = bytes_toread[i];
+            //    int b = bytes_toread[i + 1];
+
+            //    int k = i / 2;
+            //    tecdata[k] = a * 256 + b;
+            //a = bytes_toread[i];
+            //b = bytes_toread[i + 1];
+            //msg += $"{k}:{a * 256 + b} ";
+            //KRaw[k] = a * 256 + b;
+
+            //}
+            string temp = System.Text.Encoding.ASCII.GetString(tecdata);
+            Console.WriteLine($"============================== TEMP = {temp}");
+            return temp;
+        }
+        throw new SystemException($"Fail to read CCD temp");
+    }
+
 
     #region Signal Processing
     private void boxProcess(double[] refdata)

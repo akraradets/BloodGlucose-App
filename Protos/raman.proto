@@ -43,6 +43,7 @@ message DeviceStatus {
   optional int32 laser_power = 3;
   optional int32 exposure = 4;
   optional int32 accumulations = 5;
+  optional float temperature = 6;
 }
 
 message CCD{
