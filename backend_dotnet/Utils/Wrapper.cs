@@ -311,7 +311,7 @@ public class ATRWrapper
         if (acquireMethod == AcquireMethod.HighPrecision)
             mode = 0x01;
 
-        var checkstatus = false;
+        var checkstatus = true;
 
         var ccdnow = new double[CCD_DATA_PACK_SIZE];
 

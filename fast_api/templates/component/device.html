@@ -185,9 +185,9 @@
         console.log(result);
         result = JSON.parse(result);
         set_status(result);
-        //if(result.IsConnected){
+        if(result.IsConnected){
           socket_ccd.send("read_ccd");
-        //}
+        }
       })
       .catch((error) => console.error(error));
   }

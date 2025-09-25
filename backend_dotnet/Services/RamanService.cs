@@ -17,7 +17,7 @@ public class RamanService : Raman.RamanBase
     {
         _logger = logger;
         _ramanDevice = ramanDevice;
-        //_wrapper = wrapper;
+        _wrapper = wrapper;
     }
     public override Task<DeviceList> GetDeviceList(Empty request, ServerCallContext context)
     {
@@ -34,7 +34,7 @@ public class RamanService : Raman.RamanBase
         _logger.LogInformation($"Connect: request={request}, index={request.Index}");
         try
         {
-            //bool result = _wrapper.OpenDevice("COM6");
+            //bool result = _wrapper.OpenDevice("COM10");
             //_logger.LogInformation($"Connect: {result}");
             bool result = _ramanDevice.connect(request.Index);
             if (result == false)
@@ -68,8 +68,8 @@ public class RamanService : Raman.RamanBase
         {
             _logger.LogInformation($"Start reading CCD");
             int accum_count = 0;
-            //while (!context.CancellationToken.IsCancellationRequested && _ramanDevice._accumulation > accum_count)
-            while (!context.CancellationToken.IsCancellationRequested && 1 > accum_count)
+            while (!context.CancellationToken.IsCancellationRequested && _ramanDevice._accumulation > accum_count)
+            //while (!context.CancellationToken.IsCancellationRequested && 1 > accum_count)
             {
 
                 //// each read takes about 400 - 700 ms.
@@ -79,16 +79,17 @@ public class RamanService : Raman.RamanBase
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 //_logger.LogInformation($"--reading dark CCD");
-                //_wrapper.SetLdPower(200, 1);
+                //_wrapper.SetLdPower(150, 1);
                 //_wrapper.SetIntegrationTime(5000);
-                //_wrapper.SetLdPower(200);
                 //Spectrum spectrum = _wrapper.AcquireSpectrum(AcquireMethod.HighPrecision);
+                
                 //Spectrum spectrum = _wrapper.AcquireDarkSpectrum();
-                double[] ccd_data = _ramanDevice.read_ccd_data();
+                double[] ccd_data_dark = _ramanDevice.read_dark_data();
 
                 for (int i = 0; i < 2048; i++)
                 {
-                    sample.Data.Add(ccd_data[i]);
+                    //sample.Data.Add(spectrum.Data[i]);
+                    sample.Data.Add(ccd_data_dark[i]);
                 }
                 stopwatch.Stop();
                 sample.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);
@@ -97,22 +98,34 @@ public class RamanService : Raman.RamanBase
                 await responseStream.WriteAsync(sample);
 
                 //// get signal
-                //sample = new CCD();
-                //sample.Time = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
-                //stopwatch = new Stopwatch();
-                //stopwatch.Start();
-                //_logger.LogInformation($"--reading signal CCD");
-                //ccd_data = _ramanDevice.read_ccd_data();
+                sample = new CCD();
+                sample.Time = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
+                CCD sample_sub = new CCD();
+                sample_sub.Time = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
+                stopwatch = new Stopwatch();
+                stopwatch.Start();
+                _logger.LogInformation($"--reading signal CCD");
+                double[] ccd_data = _ramanDevice.read_ccd_data();
+                for (int i = 0; i < 2048; i++)
+                {
+                    sample.Data.Add(ccd_data[i]);
+                    sample_sub.Data.Add(ccd_data[i] - ccd_data_dark[i]);
+                }
+                stopwatch.Stop();
+                sample.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);
+                sample_sub.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);
+                sample.DataType = "signal";
+                sample_sub.DataType = "signal_cal";
+                _logger.LogDebug($"{sample}");
+                await responseStream.WriteAsync(sample);
+                await responseStream.WriteAsync(sample_sub);
 
-                //for (int i = 0; i < 2048; i++)
-                //{
-                //    sample.Data.Add(ccd_data[i]);
-                //}
-                //stopwatch.Stop();
-                //sample.Duration = Duration.FromTimeSpan(stopwatch.Elapsed);
-                //sample.DataType = "signal";
-                //_logger.LogDebug($"{sample}");
-                //await responseStream.WriteAsync(sample);
+
+                // subtract
+
+
+
+
                 ////await Task.Delay(TimeSpan.FromSeconds(1));
                 accum_count++;
             }
