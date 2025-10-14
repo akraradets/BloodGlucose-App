@@ -11,20 +11,22 @@
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "src:app",
+                "--factory",
+                "src:create_app",
                 "--reload",
                 "--host=0.0.0.0"
             ],
             "envFile": "${workspaceFolder}/.envfiles/dev.env",
             "jinja": true
         },
-    {
+        {
             "name": "Debug: Prod",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "src:app",
+                "--factory",
+                "src:create_app",
                 "--reload",
                 "--host=0.0.0.0"
             ],
