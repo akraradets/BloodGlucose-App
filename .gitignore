@@ -3,3 +3,6 @@ backend_dotnet/obj
 backend_dotnet/.vs
 .DS_Store
 __pycache__
+.devcontainer/mongo_data/*
+
+!.keeps

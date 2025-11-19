@@ -9,7 +9,6 @@ services:
         USER_UID: 1000
         BUILD_VERSION: DEV
         WORKDIR: /Projects/fast_api
-    platform: linux/amd64
     ports:
       - 8000:8000
     volumes:

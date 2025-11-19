@@ -197,7 +197,7 @@ async def ws_measure(websocket: WebSocket):
                 await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
                 devices:list[Device] = get_device_list()
 
-                status:DeviceStatus = get_device_connect(1)
+                status:DeviceStatus = get_device_connect(0)
                 if(status.IsConnected == False):
                     serv_msg = ServerMessage(is_ok=False, detail="Device is not connected", data={"device_status": status.model_dump()})
                     await manager.send_personal_message(serv_msg.model_dump_json(), websocket)

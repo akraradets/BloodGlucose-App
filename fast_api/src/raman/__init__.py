@@ -5,9 +5,12 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from datetime import datetime
 from pymongo import MongoClient
+import os
 
+_ME_CONFIG_MONGODB_URL = os.environ["ME_CONFIG_MONGODB_URL"]
+print(_ME_CONFIG_MONGODB_URL)
 # Create a connection to the MongoDB server
-client = MongoClient("mongodb://admin:password@localhost:27017/")
+client = MongoClient(_ME_CONFIG_MONGODB_URL)
 # Access a specific database
 db = client["blood_glucose"]
 # Access a specific collection within the database
