@@ -181,6 +181,53 @@ class ServerMessage(BaseModel):
     detail: str | None = None
     progress: float | None = None
 
+
+async def get_raman_shift() -> list[float]:
+    from src.db import OptoFile
+    from datetime import datetime
+
+    created = datetime.strptime("2025-09-25 08:16:44", "%Y-%m-%d %H:%M:%S")
+    optofile = await OptoFile.fetch(subject_id='s1', created=created)
+    return optofile.raman_shift
+
+async def create_sample(spectrum:list[float]):
+    from src.spectra import Sample
+    import numpy as np
+    from rampy import baseline as rbaseline
+
+    raman_shift:list[float] = await get_raman_shift()
+    sample:Sample = Sample(
+        x=np.array(raman_shift),
+        y=np.array(spectrum),
+        interpolate=False,
+        verbose=True
+    )
+    sample.despike(window_length=10,threshold=5)
+    sample.interpolate(step=1)
+    sample.extract_range(low=750, high=1650)
+    sample.smoothing(window_length=60, polyorder=1)
+    signal_y, by = rbaseline(sample.x, sample.y, roi=[[905, 915],[1050, 1070],[1100, 1150],[1400,1460]])
+    sample.y = signal_y.reshape(-1)
+    # f911  = sample.at(np.arange(905, 915)).mean()
+    # f1060 = sample.at(np.arange(1050, 1070)).mean()
+    # f1125 = sample.at(np.arange(1125, 1170)).mean()
+    # f1450 = sample.at(np.arange(1440, 1460)).mean()
+    sample.normalized(method='minmax')
+    sample.extract_range(low=800, high=1600)
+    return sample
+
+async def predict(spectrum:list[float]) -> float:
+    import pickle
+    from src.spectra import Sample
+    with open("../models/GridSearch-RandomForestRegressor", 'rb') as f:
+        model = pickle.load(f)
+    with open("../models/GridSearch-RandomForestRegressor_pca", 'rb') as f:
+        pca = pickle.load(f)
+
+    sample:Sample = await create_sample(spectrum=spectrum)
+    pred = float(model.predict(pca.transform(sample.y.reshape(1,-1)))[0])
+    return pred
+
 @router.websocket("/ws/measure")
 async def ws_measure(websocket: WebSocket):
     await manager.connect(websocket)
@@ -230,6 +277,6 @@ async def ws_measure(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
-async def predict(signal: np.ndarray):
-    asyncio.sleep(2)
-    return round(np.random.rand()*100,1)
+# async def predict(signal: np.ndarray):
+#     asyncio.sleep(2)
+#     return round(np.random.rand()*100,1)
