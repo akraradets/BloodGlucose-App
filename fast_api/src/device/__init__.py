@@ -9,7 +9,6 @@ import numpy as np
 import json
 from rpc import raman_pb2, raman_pb2_grpc
 
-
 router = APIRouter(
     responses={
         404: {"description": "Not found (e.g., file path, resource)"},
@@ -21,8 +20,6 @@ router = APIRouter(
 _RPC_SERVER:str = os.environ["RPC_SERVER"]
 _x_axis = np.loadtxt("static/xaxis.txt")
 stub = raman_pb2_grpc.RamanStub(channel=grpc.insecure_channel(_RPC_SERVER))
-
-
 
 class Device(BaseModel):
     name: str
@@ -38,8 +35,7 @@ def get_device_list() -> list[Device]:
     device:raman_pb2.Device
     for device in device_list.devices:
         devices.append(device)
-    # for device in device_list.devices:
-    #     devices.append(device)
+
     
     return devices
 
@@ -183,12 +179,16 @@ class ServerMessage(BaseModel):
 
 
 async def get_raman_shift() -> list[float]:
-    from src.db import OptoFile
-    from datetime import datetime
+    # from src.db import OptoFile
+    # from datetime import datetime
 
-    created = datetime.strptime("2025-09-25 08:16:44", "%Y-%m-%d %H:%M:%S")
-    optofile = await OptoFile.fetch(subject_id='s1', created=created)
-    return optofile.raman_shift
+    # created = datetime.strptime("2025-09-25 08:16:44", "%Y-%m-%d %H:%M:%S")
+    # optofile = await OptoFile.fetch(subject_id='s1', created=created)
+    # return optofile.raman_shift
+    import pickle
+    with open("models/ramanshift", 'rb') as f:
+        shift = pickle.load(f)
+    return shift
 
 async def create_sample(spectrum:list[float]):
     from src.spectra import Sample
@@ -219,9 +219,9 @@ async def create_sample(spectrum:list[float]):
 async def predict(spectrum:list[float]) -> float:
     import pickle
     from src.spectra import Sample
-    with open("../models/GridSearch-RandomForestRegressor", 'rb') as f:
+    with open("models/GridSearch-RandomForestRegressor", 'rb') as f:
         model = pickle.load(f)
-    with open("../models/GridSearch-RandomForestRegressor_pca", 'rb') as f:
+    with open("models/GridSearch-RandomForestRegressor_pca", 'rb') as f:
         pca = pickle.load(f)
 
     sample:Sample = await create_sample(spectrum=spectrum)
@@ -250,7 +250,7 @@ async def ws_measure(websocket: WebSocket):
                     await manager.send_personal_message(serv_msg.model_dump_json(), websocket)
                     continue
 
-                status:DeviceStatus = get_device_measure_conf(laser_power=100, exposure=2000, accumulation=3)
+                status:DeviceStatus = get_device_measure_conf(laser_power=300, exposure=3000, accumulation=1)
                 # await asyncio.sleep(2)
                 signal:np.ndarray = None
                 for idx, progress in enumerate([30,50,70]):

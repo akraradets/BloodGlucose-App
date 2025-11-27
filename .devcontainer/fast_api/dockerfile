@@ -24,6 +24,8 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=${WORKDIR}
 
 RUN apt install -y --no-install-recommends vim
+RUN apt install -y --no-install-recommends iputils-ping
+RUN apt install -y --no-install-recommends dnsutils
 
 RUN apt clean
 RUN rm -rf /var/lib/apt/lists/*

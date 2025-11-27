@@ -1,10 +1,21 @@
-import asyncio
+
 from typing import Any
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from datetime import datetime
-from enum import Enum
+
+from pymongo import MongoClient
+import os
+
+_ME_CONFIG_MONGODB_URL = os.environ["ME_CONFIG_MONGODB_URL"]
+print(_ME_CONFIG_MONGODB_URL)
+# Create a connection to the MongoDB server
+client = MongoClient(_ME_CONFIG_MONGODB_URL)
+# Access a specific database
+db = client["blood_glucose"]
+# Access a specific collection within the database
+collection = db["records"]
 
 router = APIRouter(
     responses={
@@ -20,16 +31,8 @@ class BloodCollection(BaseModel):
     meal: str
     before_after: str
     glucose: float
-    spectrum: list[float] | None = None
+    spectrum: dict[str, Any] | None = None
     collection_meta: dict[str, Any] | None = None
-
-class User(Enum):
-    JohnDoe = 1
-    JaneSmith = 2
-    BobJohnson = 3
-    ASDFD = 10
-    FirstnameLastname = 11
-    s1 = 12
 
 @router.post("/save", response_class=JSONResponse)
 async def post_save(blood_col: BloodCollection) -> dict:

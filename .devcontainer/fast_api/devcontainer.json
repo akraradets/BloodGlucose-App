@@ -7,7 +7,7 @@
 	"service": "fast_api",
 	"workspaceFolder": "/Projects/fast_api",
 	"overrideCommand": true,
-	"runServices": ["backend_dotnet","mongo"],
+	"runServices": ["mongo"],
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
@@ -44,7 +44,8 @@
 				"ms-python.black-formatter",
 				"ms-azuretools.vscode-containers",
 				"wholroyd.jinja",
-				"ms-toolsai.jupyter"
+				"ms-toolsai.jupyter",
+				"mongodb.mongodb-vscode"
 			]
 		}
 	}
