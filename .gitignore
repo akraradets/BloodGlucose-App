@@ -4,5 +4,5 @@ backend_dotnet/.vs
 .DS_Store
 __pycache__
 .devcontainer/mongo_data/*
-
+fast_api/additional
 !.keeps
